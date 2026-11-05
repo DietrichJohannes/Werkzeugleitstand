@@ -1,0 +1,271 @@
+/* =========================================
+   Diagramme (zu /assets/js/charts.js)
+   =========================================
+   Farben: geprüft mit dem Palette-Validator gegen weiße Fläche
+   (Farbsehschwäche-Abstand ΔE 24.7, Kontrast ≥ 3:1).
+   Reihe 1 = Blau, Reihe 2 = Orange – immer in dieser Reihenfolge. */
+
+:root {
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+
+    --chart-grid:     #e6e9ed;   /* Gitterlinien, kaum sichtbar */
+    --chart-baseline: #c3c9d0;   /* Grundlinie */
+    --chart-ink:      var(--text, #18202a);
+    --chart-muted:    var(--text-muted, #65707c);
+}
+
+.series-1 { --series: var(--series-1); }
+.series-2 { --series: var(--series-2); }
+
+
+/* ---------- Waagerechte Balken ---------- */
+
+.bar-list {
+    display: grid;
+    gap: 2px;
+}
+
+.bar-row {
+    display: grid;
+    grid-template-columns: minmax(110px, 38%) 1fr;
+    align-items: center;
+    gap: 12px;
+
+    padding: 6px 8px;
+    border-radius: var(--radius-sm, 2px);
+
+    outline: none;
+}
+
+.bar-row.is-hover,
+.bar-row:focus-visible {
+    background: var(--surface-soft, #f1f3f5);
+}
+
+.bar-row:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--primary, #1d5fbf);
+}
+
+.bar-label {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.bar-name {
+    overflow: hidden;
+    color: var(--chart-ink);
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bar-sub {
+    overflow: hidden;
+    color: var(--chart-muted);
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bar-track {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+
+    /* Platz für den Wert am Balkenende (z. B. "12,5 Tage") – der
+       längste Balken endet hier, sein Wert ragt in diesen Rand */
+    padding-right: 5.5em;
+}
+
+/* dünner Balken, gerade an der Grundlinie, 4px rund am Ende */
+.bar-fill {
+    flex: 0 0 auto;
+    min-width: 2px;
+    height: 14px;
+    background: var(--series-1);
+    border-radius: 0 4px 4px 0;
+}
+
+.bar-row.is-hover .bar-fill {
+    filter: brightness(1.12);
+}
+
+.bar-value {
+    color: var(--chart-ink);
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+
+/* ---------- Säulen ---------- */
+
+.column-chart {
+    display: grid;
+    gap: 10px;
+}
+
+.column-plot {
+    width: 100%;
+    min-width: 0;
+}
+
+.column-plot svg {
+    display: block;
+    overflow: visible;
+}
+
+.chart-grid {
+    stroke: var(--chart-grid);
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+.chart-baseline {
+    stroke: var(--chart-baseline);
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+.chart-tick {
+    fill: var(--chart-muted);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+.column-bar {
+    fill: var(--series);
+}
+
+.column-hit {
+    fill: transparent;
+}
+
+.column-group {
+    outline: none;
+    cursor: default;
+}
+
+.column-group.is-hover .column-hit,
+.column-group:focus-visible .column-hit {
+    fill: var(--surface-soft, #f1f3f5);
+}
+
+.column-group:focus-visible .column-hit {
+    stroke: var(--primary, #1d5fbf);
+    stroke-width: 2;
+}
+
+
+/* ---------- Legende ---------- */
+
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    color: var(--chart-muted);
+    font-size: 12px;
+}
+
+.chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chart-swatch {
+    width: 10px;
+    height: 10px;
+    background: var(--series);
+    border-radius: 2px;
+}
+
+
+/* ---------- Tooltip ---------- */
+
+.chart-tooltip {
+    position: fixed;
+    z-index: 1000;
+
+    padding: 8px 10px;
+
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--border, #cbd2d9);
+    border-radius: var(--radius-md, 3px);
+    box-shadow: 0 4px 14px rgba(20, 25, 30, 0.12);
+
+    color: var(--chart-ink);
+    font-size: 12px;
+
+    pointer-events: none;
+}
+
+.chart-tooltip[hidden] {
+    display: none;
+}
+
+.chart-tooltip-title {
+    margin-bottom: 4px;
+    color: var(--chart-muted);
+}
+
+.chart-tooltip-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.chart-tooltip-row strong {
+    font-size: 13px;
+}
+
+/* Linien-Schlüssel statt Kästchen */
+.chart-tooltip-key {
+    width: 12px;
+    height: 2px;
+    background: var(--series);
+}
+
+
+/* ---------- Tabellenansicht + Leerzustand ---------- */
+
+.chart-table-view {
+    margin-top: 12px;
+    font-size: 12px;
+}
+
+.chart-table-view summary {
+    color: var(--chart-muted);
+    cursor: pointer;
+}
+
+.chart-table-view table {
+    margin-top: 8px;
+}
+
+.chart-table-view th,
+.chart-table-view td {
+    width: auto;
+    padding: 6px 10px;
+}
+
+.chart-table-view td:not(:first-child),
+.chart-table-view th:not(:first-child) {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.chart-empty {
+    margin: 0;
+    padding: 28px 0;
+
+    color: var(--chart-muted);
+    font-size: 13px;
+    text-align: center;
+}

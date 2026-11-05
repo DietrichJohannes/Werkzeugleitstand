@@ -1,0 +1,316 @@
+/* =========================================
+   Startseite
+   Nutzt die Variablen aus styles.css, mit
+   Ersatzwerten, falls eine davon fehlt.
+   ========================================= */
+
+.home {
+    --home-surface: var(--surface, #ffffff);
+    --home-soft:    var(--surface-soft, #f4f6f8);
+    --home-border:  var(--border, #d8dee4);
+    --home-text:    var(--text, #1f2328);
+    --home-muted:   var(--text-muted, #656d76);
+    --home-primary: var(--primary, #0b5cad);
+    --home-radius:  var(--radius-sm, 6px);
+
+    --home-ok:      #1a7f37;
+    --home-warn:    #b35900;
+    --home-danger:  #c62828;
+
+    margin: 0;
+    min-height: 100vh;
+    background: var(--home-soft);
+    color: var(--home-text);
+}
+
+/* ---------- Kopfzeile ---------- */
+
+.home-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 28px;
+    background: var(--home-surface);
+    border-bottom: 1px solid var(--home-border);
+}
+
+.home-brand strong {
+    display: block;
+    font-size: 18px;
+}
+
+.home-brand span {
+    color: var(--home-muted);
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.home-updated {
+    color: var(--home-muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+/* ---------- Layout ---------- */
+
+.home-layout {
+    display: grid;
+    grid-template-columns: 230px 1fr;
+    min-height: calc(100vh - 64px);
+}
+
+.home-nav {
+    padding: 20px 14px;
+    background: var(--home-surface);
+    border-right: 1px solid var(--home-border);
+}
+
+.home-nav-title {
+    margin: 0 10px 8px;
+    color: var(--home-muted);
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.home-nav a {
+    display: block;
+    padding: 9px 10px;
+    margin-bottom: 2px;
+    color: var(--home-text);
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-radius: var(--home-radius);
+}
+
+.home-nav a:hover {
+    background: var(--home-soft);
+    border-color: var(--home-border);
+}
+
+.home-nav a small {
+    display: block;
+    color: var(--home-muted);
+    font-size: 11px;
+}
+
+.home-main {
+    min-width: 0;
+    padding: 28px;
+}
+
+.home-section-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 0 0 12px;
+    font-size: 15px;
+}
+
+.home-section-title span {
+    color: var(--home-muted);
+    font-size: 12px;
+    font-weight: normal;
+}
+
+/* ---------- Kennzahlen ---------- */
+
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.kpi {
+    padding: 14px 16px;
+    background: var(--home-surface);
+    border: 1px solid var(--home-border);
+    border-left: 4px solid var(--kpi-color, var(--home-primary));
+    border-radius: var(--home-radius);
+}
+
+.kpi span {
+    display: block;
+    color: var(--home-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+.kpi strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 26px;
+    font-variant-numeric: tabular-nums;
+}
+
+.kpi-total  { --kpi-color: var(--home-muted); }
+.kpi-ready  { --kpi-color: var(--home-ok); }
+.kpi-active { --kpi-color: var(--home-primary); }
+.kpi-maint  { --kpi-color: var(--home-warn); }
+
+/* ---------- Standort-Karten ---------- */
+
+.location-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+}
+
+.location-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    color: inherit;
+    text-decoration: none;
+    background: var(--home-surface);
+    border: 1px solid var(--home-border);
+    border-radius: var(--home-radius);
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.location-card:hover {
+    border-color: var(--home-primary);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+/* Status-Stufen (aus js/location-status.js) */
+.location-card.is-warning {
+    border-color: var(--home-warn);
+    box-shadow: inset 4px 0 0 var(--home-warn);
+    --level-color: var(--home-warn);
+}
+
+.location-card.is-critical {
+    border-color: var(--home-danger);
+    box-shadow: inset 4px 0 0 var(--home-danger);
+    --level-color: var(--home-danger);
+}
+
+.location-card.is-normal {
+    --level-color: var(--home-ok);
+}
+
+.location-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.location-head h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.location-badge {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    color: #fff;
+    background: var(--level-color);
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.location-numbers {
+    display: flex;
+    gap: 20px;
+}
+
+.location-numbers div {
+    color: var(--home-muted);
+    font-size: 12px;
+}
+
+.location-numbers strong {
+    display: block;
+    color: var(--home-text);
+    font-size: 22px;
+    font-variant-numeric: tabular-nums;
+}
+
+.defect-bar {
+    position: relative;
+    height: 6px;
+    background: var(--home-soft);
+    border-radius: 3px;
+    overflow: visible;
+}
+
+.defect-bar-fill {
+    height: 100%;
+    background: var(--level-color);
+    border-radius: 3px;
+}
+
+.location-reasons {
+    margin: -4px 0 0;
+    color: var(--level-color);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.defect-caption {
+    margin-top: 7px;
+    display: flex;
+    justify-content: space-between;
+    color: var(--home-muted);
+    font-size: 11px;
+}
+
+.home-message {
+    grid-column: 1 / -1;
+    padding: 32px;
+    text-align: center;
+    color: var(--home-muted);
+    background: var(--home-surface);
+    border: 1px dashed var(--home-border);
+    border-radius: var(--home-radius);
+}
+
+/* ---------- Mobil ---------- */
+
+@media (max-width: 800px) {
+    .home-header {
+        padding: 12px 16px;
+    }
+
+    .home-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .home-nav {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding: 10px 16px;
+        border-right: none;
+        border-bottom: 1px solid var(--home-border);
+    }
+
+    .home-nav-title,
+    .home-nav a small {
+        display: none;
+    }
+
+    .home-nav a {
+        flex-shrink: 0;
+        border-color: var(--home-border);
+    }
+
+    .home-main {
+        padding: 16px;
+    }
+
+    .kpi-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
