@@ -23,10 +23,12 @@ const failureDialog = setupFormDialog('failure_dialog', {
 });
 
 /*
+ * Den Status "Wartung" setzt der Server zusammen mit dem Ausfall.
+ *
  * beforeSave = optionale Funktion, die vor dem Speichern des Ausfalls
- *              läuft (z. B. Status auf "Wartung" setzen). Schlägt sie
- *              fehl, wird der Ausfall nicht gespeichert und der Dialog
- *              bleibt offen.
+ *              läuft (z. B. neuen Standort speichern). Schlägt sie fehl,
+ *              wird der Ausfall nicht gespeichert und der Dialog bleibt
+ *              offen. Darf bei erneutem Speichern wieder laufen.
  */
 async function reportFailure(tool, { hint = null, beforeSave = null } = {}) {
     const ui = failureDialog.ui;

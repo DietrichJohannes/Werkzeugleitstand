@@ -13,6 +13,7 @@ config/               Konfiguration
   config.example.php  Vorlage (im Git)
   config.php          echte Werte mit Passwörtern (NICHT im Git)
 database/             Datenbank-Schema
+storage/documents/    hochgeladene BoM-PDFs (NICHT im Git, der Webserver muss hier schreiben dürfen)
 src/                  PHP-Kern – vom Webserver NICHT erreichbar
   config.php          config('db.host') usw.
   database.php        db() – Datenbankverbindung
@@ -108,6 +109,17 @@ server {
 - [ ] HTTPS aktivieren und `session.cookie_secure` auf `true` setzen.
 - [ ] `environment` = `'production'`, `dev_fake_role` = `null`.
 - [ ] Regelmäßige Datenbank-Backups einrichten.
+
+## BoM-Dokumente
+
+BoM-PDFs werden im Editor beim Grundkörper hochgeladen und liegen in `storage/documents/`, also
+außerhalb von `public/`. Abruf nur über `/documents/` (Übersicht) und `/documents/?file=<name>`.
+
+- `storage/documents/` muss für den Webserver-Benutzer beschreibbar sein und ins Backup.
+- Die App erlaubt bis zu 20 MB pro Datei. PHP muss das ebenfalls zulassen, Standard sind nur 2 MB:
+  in der `php.ini` `upload_max_filesize = 20M` und `post_max_size = 21M` setzen, lokal
+  `php -d upload_max_filesize=20M -d post_max_size=21M -S localhost:8000 -t public`.
+  Bei nginx zusätzlich `client_max_body_size 21m;`.
 
 ## API
 

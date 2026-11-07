@@ -74,15 +74,20 @@
                     <th>Grundkörper</th>
                     <td id="tool_body"></td>
                 </tr>
+
+                <tr>
+                    <th>Letzte Reinigung</th>
+                    <td id="tool_last_cleaning"></td>
+                </tr>
             </tbody>
         </table>
         <br>
-        <h3>Werkzeug wartung</h3>
+        <h3>Werkzeug Wartung</h3>
         <button class="button_neutral" onclick="openToolParts()">
             Material
         </button>
-        <button class="button_neutral" onclick="openInstruction()">
-            Arbeitsanweisung
+        <button class="button_neutral" onclick="openCleaningInstruction()">
+            Reinigung
         </button>
         <button class="button_neutral" onclick="createRepair()">
             Neue Reparatur

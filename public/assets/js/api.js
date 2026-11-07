@@ -31,13 +31,17 @@ function apiUrl(path, params = null) {
  *   await apiRequest('tools.php', { method: 'POST', body: {...} })      // anlegen
  *   await apiRequest('tools.php', { method: 'PATCH', params: { id: 5 }, body: {...} })
  *   await apiRequest('tools.php', { method: 'DELETE', params: { id: 5 } })
+ *   await apiRequest('documents.php', { method: 'POST', body: formData }) // Datei-Upload
  *
  * Gibt die komplette JSON-Antwort zurück ({ success, message, ... }).
  */
 async function apiRequest(path, { method = 'GET', params = null, body = null } = {}) {
     const options = { method, credentials: 'same-origin', headers: {} };
 
-    if (body !== null) {
+    if (body instanceof FormData) {
+        // Datei-Upload: den Content-Type mit Boundary setzt der Browser
+        options.body = body;
+    } else if (body !== null) {
         options.headers['Content-Type'] = 'application/json';
         options.body = JSON.stringify(body);
     }

@@ -1,0 +1,4 @@
+/* Spaltenbreiten der großen Werkzeugtabelle hier nicht anwenden */
+.documents-table th {
+    width: auto;
+}

@@ -7,10 +7,12 @@
 // Tabelle, Dialog, Löschen, Suche und Export funktionieren
 // dadurch für alle Sektionen gleich.
 
-// Benötigt: /assets/js/api.js, /assets/js/tool-status.js, /components/report_dialog.js
+// Benötigt: /assets/js/api.js, /assets/js/tool-status.js, /components/report_dialog.js,
+//           /components/document_upload_dialog.js
 
-// Auswahllisten für Dropdowns im Dialog
+// Auswahllisten für Dropdowns im Dialog (Wert ist die id, außer "value" sagt etwas anderes)
 const lookups = {
+    documents:   { endpoint: 'documents.php',   key: 'documents',   label: item => item.name, value: item => item.name },
     locations:   { endpoint: 'locations.php',   key: 'locations',   label: item => item.name },
     bodies:      { endpoint: 'bodies.php',      key: 'bodies',      label: item => item.name },
     jaw_sets:    { endpoint: 'jaw_sets.php',    key: 'jaw_sets',    label: item => `${item.name} (${item.connection})` },
@@ -109,7 +111,8 @@ const sections = {
         ],
         fields: [
             { key: 'name',          label: 'Name',      type: 'text', required: true, maxLength: 100 },
-            { key: 'bom_file_name', label: 'BoM-Datei', type: 'text', maxLength: 255, placeholder: 'z. B. koerper_a.xlsx' },
+            { key: 'bom_file_name', label: 'BoM-Datei', type: 'select', lookup: 'documents', valueType: 'string',
+              action: { label: 'PDF hochladen', onClick: uploadBomDocument } },
         ],
     },
 
@@ -455,6 +458,11 @@ async function openEntityDialog(mode, item) {
     try {
         await fillLookupSelects(fields);
         fields.forEach(field => setFieldValue(field, item ? item[field.key] : null));
+
+        if (currentSection === 'tools' && mode === 'edit') {
+            await applyScrapPermission(document.getElementById('field_status_id'), item.status_id);
+        }
+
         setSaveButtonBusy(false);
         form.querySelector('input, select')?.focus();
     } catch (error) {
@@ -493,8 +501,29 @@ function buildFormRow(field) {
     input.name = field.key;
     input.required = Boolean(field.required);
 
-    row.append(label, input);
+    if (field.action) {
+        const control = document.createElement('div');
+        control.classList.add('form-row-control');
+        control.append(input, makeButton(field.action.label, ['button_neutral', 'button-small'], field.action.onClick));
+        row.append(label, control);
+    } else {
+        row.append(label, input);
+    }
+
     return row;
+}
+
+function uploadBomDocument() {
+    const field = sections.koerper.fields.find(entry => entry.key === 'bom_file_name');
+
+    openDocumentUploadDialog(async name => {
+        try {
+            await fillLookupSelects([field]);
+            setFieldValue(field, name);
+        } catch (error) {
+            showDialogError(`Auswahlliste konnte nicht aktualisiert werden: ${error.message}`);
+        }
+    });
 }
 
 async function fillLookupSelects(fields) {
@@ -506,18 +535,25 @@ async function fillLookupSelects(fields) {
         const data = await apiRequest(lookup.endpoint);
         const select = document.getElementById(`field_${field.key}`);
 
-        const placeholder = new Option('– bitte wählen –', '');
-        placeholder.disabled = true;
+        // Pflichtfelder: Platzhalter nicht wählbar, sonst bedeutet er „kein Wert“
+        const placeholder = new Option(field.required ? '– bitte wählen –' : '– keine –', '');
+        placeholder.disabled = Boolean(field.required);
 
         select.replaceChildren(
             placeholder,
-            ...data[lookup.key].map(entry => new Option(lookup.label(entry), entry.id))
+            ...data[lookup.key].map(entry => new Option(lookup.label(entry), lookup.value ? lookup.value(entry) : entry.id))
         );
     }));
 }
 
 function setFieldValue(field, value) {
     const input = document.getElementById(`field_${field.key}`);
+
+    // Alte Einträge ohne Datei auf dem Server anzeigen, damit sie beim Speichern nicht verloren gehen
+    if (field.valueType === 'string' && value && ![...input.options].some(option => option.value === value)) {
+        input.add(new Option(`${value} (nicht auf dem Server)`, value));
+    }
+
     input.value = value ?? '';
 
     // Bei Auswahlfeldern ohne Wert den Platzhalter zeigen
@@ -531,6 +567,10 @@ function readFieldValue(field) {
 
     if (raw === '') {
         return null;
+    }
+
+    if (field.valueType === 'string') {
+        return raw;
     }
 
     return field.type === 'select' || field.type === 'number' ? Number(raw) : raw;
@@ -584,9 +624,16 @@ async function saveEntity() {
     if (currentSection === 'tools' && dialogMode === 'edit' && 'status_id' in data
         && isEnteringMaintenance(itemBeingEdited.status_id, data.status_id)) {
 
+        // Den Status setzt der Server zusammen mit dem Ausfall, hier nur die übrigen Änderungen
+        const { status_id, ...otherChanges } = data;
+
         const saved = await reportFailure(itemBeingEdited, {
             hint: 'Das Werkzeug wird auf „Wartung“ gesetzt. Bitte den Grund für den Ausfall angeben.',
-            beforeSave: save,
+            beforeSave: Object.keys(otherChanges).length === 0 ? null : () => apiRequest(config.endpoint, {
+                method: 'PATCH',
+                params: { id: itemBeingEdited.id },
+                body: otherChanges,
+            }),
         });
 
         if (saved) {

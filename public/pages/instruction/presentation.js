@@ -25,6 +25,18 @@ function showSlide(index) {
         `${currentSlide + 1} / ${slides.length}`;
 }
 
+// Die Wartungsanleitung wird aus dem Werkzeug-Dialog in einem neuen Tab geöffnet.
+// Dort gibt es keinen Verlauf, also Tab schließen oder zur Startseite wechseln.
+document.getElementById('back').addEventListener('click', () => {
+    if (history.length > 1) {
+        history.back();
+        return;
+    }
+
+    window.close();
+    location.href = '/';
+});
+
 document.getElementById('next').addEventListener('click', () => {
     showSlide(currentSlide + 1);
 });
@@ -34,6 +46,11 @@ document.getElementById('prev').addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', event => {
+
+    // Pfeiltasten und Leertaste gehören in Auswahlfeldern dem Feld, nicht der Präsentation
+    if (event.target.matches('select, input, textarea')) {
+        return;
+    }
 
     if (
         event.key === 'ArrowRight' ||

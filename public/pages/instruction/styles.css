@@ -1,6 +1,4 @@
-* {
-    box-sizing: border-box;
-}
+/* Ergänzt /assets/css/styles.css (Schrift, Farben, Buttons) um das Folien-Layout. */
 
 html,
 body {
@@ -8,8 +6,12 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    font-family: Arial, sans-serif;
-    background: #111;
+}
+
+#back {
+    position: fixed;
+    top: 25px;
+    left: 25px;
 }
 
 #presentation {
@@ -21,8 +23,7 @@ body {
     display: none;
     width: 100%;
     height: 100%;
-    padding: 60px;
-    background: white;
+    padding: 90px 25px 25px;
     overflow: hidden;
 }
 
@@ -37,17 +38,18 @@ body {
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 20px;
-    background: rgba(0, 0, 0, 0.65);
+    gap: 16px;
     padding: 8px 14px;
-    border-radius: 8px;
-    color: white;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
 }
 
 .controls button {
-    border: 0;
-    background: transparent;
-    color: white;
-    font-size: 28px;
-    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.cleaning-confirm {
+    max-width: 520px;
 }

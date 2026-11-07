@@ -1,13 +1,12 @@
 # Lokale Konfiguration mit Passwörtern
 /config/config.php
 
-# Persönliche Claude-Code-Einstellungen
-/.claude/settings.local.json
-CLAUDE.local.md
-
 # Editor / System
 .idea/
 .vscode/
 *.swp
 .DS_Store
 Thumbs.db
+
+# Hochgeladene Dokumente
+/storage/

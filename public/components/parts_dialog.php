@@ -31,6 +31,7 @@
     </div>
 
     <div class="dialog-actions">
+        <button type="button" class="button_neutral" data-open-bom-file>Materialliste</button>
         <button type="button" class="button_neutral" data-parts-close>Schließen</button>
     </div>
 

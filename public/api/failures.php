@@ -17,6 +17,9 @@ require_once __DIR__ . '/../../src/api_bootstrap.php';
  *          part_id (optional, Bauteil aus dem Backenset des Werkzeugs),
  *          description (optional, Bemerkung)
  *  created_by setzt der Server.
+ *
+ *  Nach dem Anlegen wird das Werkzeug automatisch auf "Wartung"
+ *  gesetzt – alles in einer Transaktion.
  */
 
 const FAILURE_DESCRIPTION_MAX = 500;
@@ -96,15 +99,27 @@ function handleCreate(): void
     $values = validateFields(readJsonBody(), failureFields(), false);
 
     requireExists('tools', $values['tool_id'], 'Werkzeug nicht gefunden');
+    requireScrapPermissionForChange($values['tool_id'], TOOL_STATUS_MAINTENANCE);
     requireActiveCause($values['cause_id']);
     if ($values['part_id'] !== null) {
         requirePartOfTool($values['part_id'], $values['tool_id']);
     }
 
     $values['created_by'] = currentUserId();
-    $id = insertRow('failures', $values);
 
-    sendJson(['success' => true, 'message' => 'Ausfall wurde erstellt', 'failure_id' => $id], 201);
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $id = insertRow('failures', $values);
+        updateRow('tools', $values['tool_id'], ['status_id' => TOOL_STATUS_MAINTENANCE]);
+
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;   // zentrale Fehlerbehandlung
+    }
+
+    sendJson(['success' => true, 'message' => 'Ausfall wurde erstellt, Werkzeug ist in Wartung', 'failure_id' => $id], 201);
 }
 
 function requireActiveCause(int $causeId): void

@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../src/api_bootstrap.php';
+require_once __DIR__ . '/../../src/documents.php';
 
 /*
  * ============================================================
@@ -13,14 +14,25 @@ require_once __DIR__ . '/../../src/api_bootstrap.php';
  *  PATCH  /api/bodies.php?id=1     ändern    (Einrichter)
  *  DELETE /api/bodies.php?id=1     löschen   (Einrichter, nur wenn kein Werkzeug ihn nutzt)
  *
- *  Felder: name (Pflicht), bom_file_name (optional, Name der BoM-Datei)
+ *  Felder: name (Pflicht), bom_file_name (optional, Name einer Datei aus /api/documents.php)
  */
+
+function optionalBomFile(mixed $value): ?string
+{
+    $name = optionalString($value, 'BoM-Datei', 255);
+
+    if ($name !== null && !documentExists($name)) {
+        sendError(400, 'Die BoM-Datei ist auf dem Server nicht vorhanden');
+    }
+
+    return $name;
+}
 
 function bodyFields(): array
 {
     return [
         'name'          => ['name',          fn($v) => requireString($v, 'Name', 100)],
-        'bom_file_name' => ['bom_file_name', fn($v) => optionalString($v, 'BoM-Datei', 255)],
+        'bom_file_name' => ['bom_file_name', fn($v) => optionalBomFile($v)],
     ];
 }
 

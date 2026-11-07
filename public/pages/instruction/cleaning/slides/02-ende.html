@@ -11,5 +11,18 @@
     <br>
     <br>
     <br>
-    <button class="button_neutral">Reinigung Quittieren</button>
+
+    <!-- Logik: cleaning/script.js -->
+    <div class="cleaning-confirm">
+        <div class="form-row">
+            <label for="cleaning_tool">Werkzeug *</label>
+            <select id="cleaning_tool">
+                <option value="">– bitte wählen –</option>
+            </select>
+        </div>
+
+        <p class="hidden" id="cleaning_message"></p>
+
+        <button type="button" class="button_positiv" id="cleaning_confirm">Reinigung Quittieren</button>
+    </div>
 </div>

@@ -284,10 +284,12 @@
 </dialog>
 
 <?php include __DIR__ . '/../../components/report_dialog.php'; ?>
+<?php include __DIR__ . '/../../components/document_upload_dialog.php'; ?>
 
 <script src="/assets/js/api.js"></script>
 <script src="/assets/js/tool-status.js"></script>
 <script src="/components/report_dialog.js"></script>
+<script src="/components/document_upload_dialog.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

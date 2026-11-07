@@ -25,8 +25,10 @@
             <div class="home-nav-title">Menü</div>
 
             <a href="/pages/overview/">Übersicht<small>Werkzeuge Suchen</small></a>
+            <a href="/documents/">Dokumente<small>Stücklisten zu Werkzeugen</small></a>
             <a href="/pages/management/">Management-Ansicht<small>Kennzahlen und Auswertung</small></a>
-            <a href="/pages/instruction/cleaning/">Werkzeug Wartung<small>Anleitung</small></a>
+            <a href="/pages/instruction/cleaning/">Werkzeug Reinigung<small>Anleitung</small></a>
+            <a href="/pages/instruction/repair/"> Werkzeug Warten<small>Anleitung</small></a>
             <a href="/pages/editor/">Verwaltung<small>Stammdaten pflegen</small></a>
         </nav>
 

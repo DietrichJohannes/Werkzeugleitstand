@@ -307,7 +307,7 @@ function renderAnalytics(data) {
     setText('kpi_open_failures', summary.open_failures.toLocaleString('de-DE'));
     setText('kpi_open_failures_text', summary.open_failures > 0
         ? 'aktuell noch in Wartung'
-        : 'aktuell keine – alles abgeschlossen');
+        : 'keine offenen Ausfälle');
     setLevel(document.getElementById('open_failures_card'), summary.open_failures > 0 ? 'warning' : 'normal');
 
     // Verlauf

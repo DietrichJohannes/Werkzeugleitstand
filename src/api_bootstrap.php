@@ -7,10 +7,10 @@ declare(strict_types=1);
  * ============================================================
  */
 
-const API_NAME              = 'BSH Werkzeugleitstand API';
-const API_VERSION           = '1.3.17';
+const API_NAME              = 'BSH Werkzeugleitstand';
+const API_VERSION           = '1.0.0';
 const API_AUTHOR            = 'Johannes Dietrich';
-const API_LAST_MODIFIED     = '28.10.2026';
+const API_LAST_MODIFIED     = '06.11.2026';
 const API_DESCRIPTION       = 'REST-API zur Verwaltung von Werkzeugen, Reparaturen und Ersatzteilen.';
 
 /*
@@ -265,6 +265,25 @@ function requirePartOfTool(int $partId, int $toolId): void
 
     if (!$stmt->fetchColumn()) {
         sendError(400, 'Das Bauteil gehört nicht zu diesem Werkzeug');
+    }
+}
+
+/*
+ * Ein Werkzeug auf "Verschrottet" setzen oder von dort zurückholen darf
+ * nur, wer das Recht 'tools.scrap' hat. Der Aufrufer prüft vorher, dass
+ * das Werkzeug existiert.
+ */
+function requireScrapPermissionForChange(int $toolId, int $newStatusId): void
+{
+    $stmt = db()->prepare('SELECT status_id FROM tools WHERE id = ?');
+    $stmt->execute([$toolId]);
+    $currentStatusId = (int)$stmt->fetchColumn();
+
+    $touchesScrapped = $currentStatusId !== $newStatusId
+        && in_array(TOOL_STATUS_SCRAPPED, [$currentStatusId, $newStatusId], true);
+
+    if ($touchesScrapped && !can('tools.scrap')) {
+        sendError(403, 'Nur Einrichter dürfen Werkzeuge verschrotten oder zurückholen');
     }
 }
 

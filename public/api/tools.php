@@ -12,7 +12,8 @@ require_once __DIR__ . '/../../src/api_bootstrap.php';
  *  GET    /api/tools.php?location_id=2    Werkzeuge eines Standorts
  *  POST   /api/tools.php                  Werkzeug anlegen      (Einrichter)
  *  PATCH  /api/tools.php?id=5             Werkzeug ändern       (User: Status/Standort,
- *                                                                Einrichter: alles)
+ *                                                                Einrichter: alles;
+ *                                                                "Verschrottet" nur Einrichter)
  *  DELETE /api/tools.php?id=5             Werkzeug löschen      (Einrichter)
  */
 
@@ -49,6 +50,7 @@ function formatTool(array $row): array
         'jaw_set_name' => $row['tool_jaw_set_name'],
         'connection'   => $row['tool_connection'],
         'lokring'      => $row['tool_lokring'],
+        'last_cleaning_at' => $row['last_cleaning_at'],
     ];
 }
 
@@ -66,7 +68,8 @@ function fetchTools(string $where = '', array $params = []): array
             connections.name    AS tool_connection,
             connections.lokring AS tool_lokring,
             jaw_sets.name       AS tool_jaw_set_name,
-            bodies.name         AS tool_body
+            bodies.name         AS tool_body,
+            (SELECT MAX(created_at) FROM cleanings WHERE cleanings.tool_id = tools.id) AS last_cleaning_at
         FROM tools
         JOIN locations   ON tools.location_id      = locations.id
         JOIN jaw_sets    ON tools.jaw_set_id       = jaw_sets.id
@@ -223,6 +226,7 @@ function handleUpdate(): void
     requireToolExists($id);
 
     if (isset($data['status_id'])) {
+        requireScrapPermissionForChange($id, (int)$data['status_id']);
         requireMaintenanceClosed($id, (int)$data['status_id']);
     }
 

@@ -38,6 +38,20 @@ function isLeavingMaintenance(oldStatusId, newStatusId) {
         && [TOOL_STATUS_READY, TOOL_STATUS_ACTIVE].includes(Number(newStatusId));
 }
 
+// Verschrotten und Zurückholen nur mit dem Recht 'tools.scrap':
+// Ohne das Recht fehlt die Option, ein verschrottetes Werkzeug bleibt gesperrt.
+// Der Server prüft das zusätzlich. Benötigt /assets/js/api.js.
+async function applyScrapPermission(select, currentStatusId) {
+    const { permissions } = await apiRequest('permissions.php');
+    const canScrap = permissions.includes('tools.scrap');
+    const isScrapped = Number(currentStatusId) === TOOL_STATUS_SCRAPPED;
+    const scrapOption = [...select.options].find(option => Number(option.value) === TOOL_STATUS_SCRAPPED);
+
+    scrapOption.hidden = !canScrap && !isScrapped;
+    scrapOption.disabled = !canScrap;
+    select.disabled = !canScrap && isScrapped;
+}
+
 // Erzeugt ein <span> mit Farbe und Text des Status.
 function buildStatusChip(statusId) {
     const status = getToolStatus(statusId);

@@ -22,6 +22,7 @@ async function openToolDialog(toolId, statusId, locationId) {
     try {
         await loadLocationOptions();
         await loadToolDetails(toolId);
+        await applyScrapPermission(StatusSelect, statusId);
     } catch (error) {
         console.error("Fehler beim Öffnen des Werkzeugs:", error);
         alert(`Werkzeug konnte nicht geladen werden: ${error.message}`);
@@ -53,6 +54,7 @@ async function loadToolDetails(toolId) {
     document.getElementById("tool_backenset").textContent = tool.jaw_set_name;
     document.getElementById("tool_lokring").textContent = tool.lokring;
     document.getElementById("tool_connection").textContent = tool.connection;
+    document.getElementById("tool_last_cleaning").textContent = formatDate(tool.last_cleaning_at) || "Noch keine";
 }
 
 // Nach der Reparatur ist das Werkzeug "Bereit" → Dialog schließen, Liste neu laden
@@ -84,7 +86,12 @@ async function saveToolChanges() {
             { id: currentToolId, name: currentToolName },
             {
                 hint: "Das Werkzeug wird auf „Wartung“ gesetzt. Bitte den Grund für den Ausfall angeben.",
-                beforeSave: saveTool,
+                // Den Status setzt der Server zusammen mit dem Ausfall
+                beforeSave: () => apiRequest("tools.php", {
+                    method: "PATCH",
+                    params: { id: currentToolId },
+                    body: { location_id: changes.location_id },
+                }),
             }
         );
 
@@ -126,4 +133,8 @@ function openToolParts() {
 
 function openInstruction() {
     window.open("/pages/instruction/repair/");
+}
+
+function openCleaningInstruction() {
+    window.open("/pages/instruction/cleaning/");
 }

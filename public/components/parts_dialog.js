@@ -22,8 +22,10 @@ async function openPartsDialog(tool) {
     d.dialog.showModal();
 
     try {
-        const { parts } = await apiRequest('parts.php', { params: { tool_id: tool.id } });
+        const { parts } = await apiRequest('parts.php',  { params: { tool_id: tool.id } });
+        const { body }  = await apiRequest('bodies.php', { params: { id: tool.id } });
         renderParts(parts);
+        getBoMPath(body);
     } catch (error) {
         console.error('Fehler beim Laden der Ersatzteile:', error);
         setPartsMessage('');
@@ -160,3 +162,30 @@ partsDialog.dialog.addEventListener('click', event => {
         closePartsDialog();
     }
 });
+
+partsDialog.dialog.querySelector('[data-open-bom-file]')
+    .addEventListener('click', openBoMFile);
+
+
+let bomPath = null;
+
+// Dateipfad aus API-Daten erstellen
+function getBoMPath(body) {
+    const fileName = body?.bom_file_name;
+
+    if (!fileName) {
+        bomPath = null;
+        return;
+    }
+
+    bomPath = `/documents/?file=${encodeURIComponent(fileName)}`;
+}
+
+function openBoMFile() {
+    if (!bomPath) {
+        alert('Für dieses Werkzeug ist keine Stückliste hinterlegt.');
+        return;
+    }
+
+    window.open(bomPath, '_blank', 'noopener,noreferrer');
+}

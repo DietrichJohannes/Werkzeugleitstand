@@ -427,3 +427,11 @@ input[type="number"]:focus {
     }
 
 }
+
+
+/* Eingabefeld mit Button darunter (z. B. BoM-Datei + Hochladen) */
+.form-row-control {
+    display: grid;
+    gap: 8px;
+    justify-items: start;
+}

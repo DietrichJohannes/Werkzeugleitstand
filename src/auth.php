@@ -29,6 +29,7 @@ const PERMISSIONS = [
     'tools.create'          => [ROLE_EINRICHTER],
     'tools.edit_masterdata' => [ROLE_EINRICHTER],              // Name, Körper, Backenset
     'tools.delete'          => [ROLE_EINRICHTER],
+    'tools.scrap'           => [ROLE_EINRICHTER],              // auf "Verschrottet" setzen und zurückholen
 
     // Reparaturen
     'repairs.read'          => [ROLE_BEOBACHTER, ROLE_USER, ROLE_EINRICHTER],
@@ -39,6 +40,10 @@ const PERMISSIONS = [
     'failures.read'         => [ROLE_BEOBACHTER, ROLE_USER, ROLE_EINRICHTER],
     'failures.write'        => [ROLE_USER, ROLE_EINRICHTER],
     'failures.delete'       => [ROLE_EINRICHTER],
+
+    // Reinigungen
+    'cleanings.read'        => [ROLE_BEOBACHTER, ROLE_USER, ROLE_EINRICHTER],
+    'cleanings.write'       => [ROLE_USER, ROLE_EINRICHTER],
 
     // Ausfallursachen (Auswahlliste)
     'failure_causes.read'   => [ROLE_BEOBACHTER, ROLE_USER, ROLE_EINRICHTER],
@@ -56,8 +61,12 @@ const PERMISSIONS = [
     'bodies.read'           => [ROLE_BEOBACHTER, ROLE_USER, ROLE_EINRICHTER],
     'bodies.write'          => [ROLE_EINRICHTER],
 
+    // Dokumente (BoM-PDFs)
+    'documents.read'        => [ROLE_BEOBACHTER, ROLE_USER, ROLE_EINRICHTER],
+    'documents.write'       => [ROLE_EINRICHTER],
+
     // Backensets
-    'jaw_sets.read'         => [ROLE_BEOBACHTER, ROLE_USER, ROLE_EINRICHTER],
+    'jaw_sets.read'        => [ROLE_BEOBACHTER, ROLE_USER, ROLE_EINRICHTER],
     'jaw_sets.write'        => [ROLE_EINRICHTER],
 
     // Verbindungen
@@ -124,6 +133,15 @@ function can(string $permission): bool
     }
 
     return in_array($user['role'], PERMISSIONS[$permission] ?? [], true);
+}
+
+/*
+ * Alle Rechte des aktuellen Benutzers, damit das Frontend Optionen
+ * ausblenden kann. Geprüft wird trotzdem immer auf dem Server.
+ */
+function currentPermissions(): array
+{
+    return array_values(array_filter(array_keys(PERMISSIONS), 'can'));
 }
 
 /*

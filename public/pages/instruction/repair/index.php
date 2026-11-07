@@ -8,9 +8,12 @@ sort($slideFiles);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reparatur</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
     <link rel="stylesheet" type="text/css" href="../styles.css">
 </head>
 <body>
+
+<button id="back" class="button_neutral">Zurück</button>
 
 <div id="presentation">
 
@@ -23,13 +26,13 @@ sort($slideFiles);
 </div>
 
 <div class="controls">
-    <button id="prev">‹</button>
+    <button id="prev" class="button_neutral">‹</button>
 
     <span id="counter">
         1 / <?= count($slideFiles) ?>
     </span>
 
-    <button id="next">›</button>
+    <button id="next" class="button_neutral">›</button>
 </div>
 
 <script>
