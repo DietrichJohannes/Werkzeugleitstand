@@ -73,6 +73,10 @@ const PERMISSIONS = [
     'connections.read'      => [ROLE_BEOBACHTER, ROLE_USER, ROLE_EINRICHTER],
     'connections.write'     => [ROLE_EINRICHTER],
 
+    // Einrichter Panel
+    'admin.access'          => [ROLE_EINRICHTER],
+    'documents.access'      => [ROLE_USER, ROLE_EINRICHTER],
+
     // Übersicht / Statistik (nur lesen, aber nur für angemeldete Nutzer)
     'dashboard.read'        => [ROLE_BEOBACHTER, ROLE_USER, ROLE_EINRICHTER],
 ];

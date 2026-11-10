@@ -86,9 +86,6 @@
         <button class="button_neutral" onclick="openToolParts()">
             Material
         </button>
-        <button class="button_neutral" onclick="openCleaningInstruction()">
-            Reinigung
-        </button>
         <button class="button_neutral" onclick="createRepair()">
             Neue Reparatur
         </button>

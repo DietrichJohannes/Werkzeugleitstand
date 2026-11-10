@@ -18,7 +18,7 @@ if (isset($_GET['file'])) {
         $name = $_GET['file'];
 
         if (!is_string($name) || !documentExists($name)) {
-            sendError(404, 'Datei nicht gefunden');
+            sendError(404, 'Datei nicht gefunden!');
         }
 
         $path = documentPath($name);
@@ -49,7 +49,7 @@ if (isset($_GET['file'])) {
     <br>
     <br>
     <h1>Dokumente</h1>
-    <h3>BoM-Dateien auf dem Server</h3>
+    <h3>Verfügbare Dokumente auf dem Server</h3>
 
     <table class="documents-table">
         <thead>

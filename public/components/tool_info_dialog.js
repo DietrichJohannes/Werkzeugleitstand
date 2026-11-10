@@ -54,7 +54,7 @@ async function loadToolDetails(toolId) {
     document.getElementById("tool_backenset").textContent = tool.jaw_set_name;
     document.getElementById("tool_lokring").textContent = tool.lokring;
     document.getElementById("tool_connection").textContent = tool.connection;
-    document.getElementById("tool_last_cleaning").textContent = formatDate(tool.last_cleaning_at) || "Noch keine";
+    document.getElementById("tool_last_cleaning").textContent = formatDate(tool.last_cleaning_at) || "Noch kein Reinigung angelegt";
 }
 
 // Nach der Reparatur ist das Werkzeug "Bereit" → Dialog schließen, Liste neu laden
@@ -129,12 +129,4 @@ function closeToolDialog() {
 
 function openToolParts() {
     openPartsDialog({ id: currentToolId, name: currentToolName });
-}
-
-function openInstruction() {
-    window.open("/pages/instruction/repair/");
-}
-
-function openCleaningInstruction() {
-    window.open("/pages/instruction/cleaning/");
 }

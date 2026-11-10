@@ -7,17 +7,22 @@
 // Verwendung: openPartsDialog({ id: 5, name: 'Werkzeug A' })
 
 const partsDialog = {
-    dialog:  document.getElementById('parts_dialog'),
-    eyebrow: document.getElementById('parts_dialog_eyebrow'),
-    error:   document.getElementById('parts_dialog_error'),
-    body:    document.getElementById('parts_table_body'),
+    dialog:     document.getElementById('parts_dialog'),
+    eyebrow:    document.getElementById('parts_dialog_eyebrow'),
+    error:      document.getElementById('parts_dialog_error'),
+    body:       document.getElementById('parts_table_body'),
+    bomMessage: document.getElementById('parts_dialog_bom_message'),
+    bomButton:  document.getElementById('parts_dialog_bom_button'),
 };
+
+let bomPath = null;
 
 async function openPartsDialog(tool) {
     const d = partsDialog;
 
     d.eyebrow.textContent = tool.name ?? '';
     d.error.classList.add('hidden');
+    resetBom();
     setPartsMessage('Lädt…');
     d.dialog.showModal();
 
@@ -25,7 +30,7 @@ async function openPartsDialog(tool) {
         const { parts } = await apiRequest('parts.php',  { params: { tool_id: tool.id } });
         const { body }  = await apiRequest('bodies.php', { params: { id: tool.id } });
         renderParts(parts);
-        getBoMPath(body);
+        renderBom(body);
     } catch (error) {
         console.error('Fehler beim Laden der Ersatzteile:', error);
         setPartsMessage('');
@@ -86,6 +91,34 @@ function setPartsMessage(text) {
     const row = document.createElement('tr');
     row.appendChild(cell);
     partsDialog.body.replaceChildren(row);
+}
+
+// ---------- Materialliste ----------
+
+function resetBom() {
+    bomPath = null;
+    partsDialog.bomMessage.classList.add('hidden');
+    partsDialog.bomButton.classList.add('hidden');
+}
+
+function renderBom(body) {
+    const d = partsDialog;
+    const fileName = body?.bom_file_name;
+
+    if (!fileName) {
+        d.bomMessage.textContent = 'Für dieses Werkzeug ist keine Materialliste hinterlegt.';
+        d.bomMessage.classList.remove('hidden');
+        return;
+    }
+
+    bomPath = `/documents/?file=${encodeURIComponent(fileName)}`;
+    d.bomButton.classList.remove('hidden');
+}
+
+function openBomFile() {
+    if (bomPath) {
+        window.open(bomPath, '_blank', 'noopener,noreferrer');
+    }
 }
 
 // ---------- Kopieren ----------
@@ -163,29 +196,4 @@ partsDialog.dialog.addEventListener('click', event => {
     }
 });
 
-partsDialog.dialog.querySelector('[data-open-bom-file]')
-    .addEventListener('click', openBoMFile);
-
-
-let bomPath = null;
-
-// Dateipfad aus API-Daten erstellen
-function getBoMPath(body) {
-    const fileName = body?.bom_file_name;
-
-    if (!fileName) {
-        bomPath = null;
-        return;
-    }
-
-    bomPath = `/documents/?file=${encodeURIComponent(fileName)}`;
-}
-
-function openBoMFile() {
-    if (!bomPath) {
-        alert('Für dieses Werkzeug ist keine Stückliste hinterlegt.');
-        return;
-    }
-
-    window.open(bomPath, '_blank', 'noopener,noreferrer');
-}
+partsDialog.bomButton.addEventListener('click', openBomFile);

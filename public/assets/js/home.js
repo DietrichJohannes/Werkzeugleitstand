@@ -146,6 +146,8 @@ function showMessage(text) {
 // ---------- Start + automatische Aktualisierung ----------
 
 async function refresh() {
+    applyPermissions();
+
     const results = await Promise.allSettled([loadKpis(), loadLocations()]);
     const failed = results.find(result => result.status === 'rejected');
 
@@ -182,3 +184,23 @@ document.addEventListener('visibilitychange', () => {
         refresh();
     }
 });
+
+// ---------- Berechtigungen ----------
+// Blendet nur Elemente aus. Geprüft wird immer auf dem Server.
+
+async function applyPermissions() {
+    try {
+        const response = await fetch('/api/me.php', { cache: 'no-store' });
+
+        // Bei 401/403 gibt es keine Rechte -> alles ausblenden
+        const permissions = response.ok ? (await response.json()).permissions : [];
+        const allowed = new Set(permissions);
+
+        document.querySelectorAll('[data-permission]').forEach(element => {
+            element.hidden = !allowed.has(element.dataset.permission);
+        });
+    } catch (error) {
+        // Netzwerkfehler: aktuellen Zustand beibehalten
+        console.error('Berechtigungen konnten nicht geladen werden:', error);
+    }
+}

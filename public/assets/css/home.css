@@ -276,6 +276,10 @@
     border-radius: var(--home-radius);
 }
 
+[hidden] {
+    display: none !important;
+}
+
 /* ---------- Mobil ---------- */
 
 @media (max-width: 800px) {

@@ -30,8 +30,13 @@
         </table>
     </div>
 
+    <br>
+
+    <p class="dialog-error hidden" id="parts_dialog_bom_message"></p>
+    <button type="button" class="button_neutral hidden" id="parts_dialog_bom_button">Materialliste</button>
+
     <div class="dialog-actions">
-        <button type="button" class="button_neutral" data-open-bom-file>Materialliste</button>
+
         <button type="button" class="button_neutral" data-parts-close>Schließen</button>
     </div>
 
