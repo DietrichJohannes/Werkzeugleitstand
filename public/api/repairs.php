@@ -112,7 +112,7 @@ function handleCreate(): void
             $stmt->execute([$id, $partId]);
         }
 
-        updateRow('tools', $toolId, ['status_id' => TOOL_STATUS_READY]);
+        updateToolTracked($toolId, ['status_id' => TOOL_STATUS_READY], "Reparatur #$id erfasst");
 
         $pdo->commit();
     } catch (Throwable $e) {

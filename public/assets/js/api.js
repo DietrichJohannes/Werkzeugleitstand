@@ -36,7 +36,9 @@ function apiUrl(path, params = null) {
  * Gibt die komplette JSON-Antwort zurück ({ success, message, ... }).
  */
 async function apiRequest(path, { method = 'GET', params = null, body = null } = {}) {
-    const options = { method, credentials: 'same-origin', headers: {} };
+    // X-Requested-With: Pflicht für schreibende Aufrufe (CSRF-Schutz,
+    // siehe requireSameOriginRequest() in src/api_bootstrap.php)
+    const options = { method, credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' } };
 
     if (body instanceof FormData) {
         // Datei-Upload: den Content-Type mit Boundary setzt der Browser

@@ -92,6 +92,12 @@
     </div>
 
 
+    <details class="dialog-section tool-history">
+        <summary><h3>Verlauf</h3></summary>
+        <ul id="tool_history_list" class="tool-history-list"></ul>
+    </details>
+
+
     <div class="dialog-actions">
         <button
             type="button"

@@ -55,6 +55,72 @@ async function loadToolDetails(toolId) {
     document.getElementById("tool_lokring").textContent = tool.lokring;
     document.getElementById("tool_connection").textContent = tool.connection;
     document.getElementById("tool_last_cleaning").textContent = formatDate(tool.last_cleaning_at) || "Noch kein Reinigung angelegt";
+
+    await loadToolHistory(toolId);
+}
+
+/*
+ * Verlauf (Status-, Standort- und Stammdatenänderungen) – neueste zuerst.
+ * Ein Fehler hier soll den Dialog nicht blockieren.
+ */
+async function loadToolHistory(toolId) {
+    const list = document.getElementById("tool_history_list");
+
+    try {
+        const { events } = await apiRequest("tool_events.php", { params: { tool_id: toolId } });
+
+        if (events.length === 0) {
+            list.replaceChildren(historyItem("", "Noch keine Änderungen erfasst", ""));
+            return;
+        }
+
+        list.replaceChildren(...events.map(event => historyItem(
+            formatDateTimeShort(event.created_at),
+            describeToolEvent(event),
+            [event.created_by_name, event.description].filter(Boolean).join(" · ")
+        )));
+    } catch (error) {
+        console.error("Verlauf konnte nicht geladen werden:", error);
+        list.replaceChildren(historyItem("", "Verlauf konnte nicht geladen werden", ""));
+    }
+}
+
+function describeToolEvent(event) {
+    if (event.field === "created") {
+        return event.new_label ? `Angelegt (Standort ${event.new_label})` : "Angelegt";
+    }
+    return `${event.field_label}: ${event.old_label ?? "–"} → ${event.new_label ?? "–"}`;
+}
+
+// textContent statt innerHTML – Werte kommen aus der Datenbank
+function historyItem(time, text, meta) {
+    const item = document.createElement("li");
+
+    const timeEl = document.createElement("span");
+    timeEl.className = "tool-history-time";
+    timeEl.textContent = time;
+
+    const textEl = document.createElement("span");
+    textEl.className = "tool-history-text";
+    textEl.textContent = text;
+
+    item.append(timeEl, textEl);
+
+    if (meta) {
+        const metaEl = document.createElement("span");
+        metaEl.className = "tool-history-meta";
+        metaEl.textContent = meta;
+        item.append(metaEl);
+    }
+
+    return item;
+}
+
+// "2026-10-30 14:05:00" → "30.10.2026 14:05"
+function formatDateTimeShort(value) {
+    if (!value) return "";
+    const [, time = ""] = value.split(" ");
+    return `${formatDate(value)} ${time.slice(0, 5)}`.trim();
 }
 
 // Nach der Reparatur ist das Werkzeug "Bereit" → Dialog schließen, Liste neu laden

@@ -32,10 +32,13 @@ async function loadTools() {
     } catch (error) {
         console.error("Fehler beim Laden der Werkzeuge:", error);
         showMessage(`Werkzeuge konnten nicht geladen werden: ${error.message}`);
+        document.getElementById("tool_count").textContent = "";
     }
 }
 
 function renderTools(tools) {
+    updateToolCount(Array.isArray(tools) ? tools : []);
+
     if (!Array.isArray(tools) || tools.length === 0) {
         showMessage("Keine Werkzeuge an diesem Standort");
         return;
@@ -44,39 +47,102 @@ function renderTools(tools) {
     toolsGrid.replaceChildren(...tools.map(buildToolCard));
 }
 
+/*
+ * Aufbau einer Karte:
+ *   Kopf     – Kennung "Werkzeug" + Status-Chip, darunter der Name
+ *   Daten    – Verbindung, Lokring, Backenset, Grundkörper
+ *   Fußzeile – letzte Reinigung
+ */
 function buildToolCard(tool) {
     const status = getToolStatus(tool.status_id);
 
     const article = document.createElement("article");
     article.className = `line-card ${status.chip.replace("chip_", "status-")}`;
-    article.addEventListener("click", () => {
-        openToolDialog(tool.id, tool.status_id, tool.location_id);
+    article.tabIndex = 0;
+    article.setAttribute("role", "button");
+    article.setAttribute("aria-label", `Werkzeug ${tool.name} öffnen, Status ${status.label}`);
+
+    const open = () => openToolDialog(tool.id, tool.status_id, tool.location_id);
+    article.addEventListener("click", open);
+    article.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            open();
+        }
     });
+
+    // ---------- Kopf ----------
+
+    const eyebrow = document.createElement("span");
+    eyebrow.className = "line-card-eyebrow";
+    eyebrow.textContent = "Werkzeug";
+
+    const head = document.createElement("div");
+    head.className = "line-card-head";
+    head.append(eyebrow, buildStatusChip(tool.status_id));
 
     const title = document.createElement("h3");
     title.textContent = tool.name;
 
-    const statusBox = document.createElement("div");
-    statusBox.className = status.chip;
-    const statusText = document.createElement("strong");
-    statusText.textContent = status.label;
-    statusBox.append(statusText);
+    // ---------- Daten ----------
 
-    const connection = document.createElement("p");
-    connection.textContent = tool.connection ?? "";
-    const connectionBox = document.createElement("div");
-    connectionBox.append(connection);
+    const data = document.createElement("dl");
+    data.className = "line-card-data";
+    data.append(
+        buildDataField("Verbindung", tool.connection),
+        buildDataField("Lokring", tool.lokring),
+        buildDataField("Backenset", tool.jaw_set_name),
+        buildDataField("Grundkörper", tool.body),
+    );
 
-    const info = document.createElement("div");
-    info.className = "line-info";
-    info.append(statusBox, document.createElement("br"), connectionBox);
+    // ---------- Fußzeile ----------
 
-    article.append(title, info);
+    const footer = document.createElement("div");
+    footer.className = "line-card-footer";
+    footer.textContent = `Letzte Reinigung: ${formatDate(tool.last_cleaning_at)}`;
+
+    article.append(head, title, data, footer);
     return article;
+}
+
+function buildDataField(label, value) {
+    const wrapper = document.createElement("div");
+
+    const term = document.createElement("dt");
+    term.textContent = label;
+
+    const description = document.createElement("dd");
+    description.textContent = value || "–";
+
+    wrapper.append(term, description);
+    return wrapper;
+}
+
+// "2026-11-06 14:30:00" → "06.11.2026"
+function formatDate(value) {
+    if (!value) {
+        return "–";
+    }
+
+    const [year, month, day] = String(value).slice(0, 10).split("-");
+    return day && month && year ? `${day}.${month}.${year}` : "–";
+}
+
+// Kopfzeile rechts: "6 Werkzeuge · 1 in Wartung"
+function updateToolCount(tools) {
+    const inMaintenance = tools.filter(tool => tool.status_id === TOOL_STATUS_MAINTENANCE).length;
+    const parts = [`${tools.length} ${tools.length === 1 ? "Werkzeug" : "Werkzeuge"}`];
+
+    if (inMaintenance > 0) {
+        parts.push(`${inMaintenance} in Wartung`);
+    }
+
+    document.getElementById("tool_count").textContent = parts.join(" · ");
 }
 
 function showMessage(text) {
     const p = document.createElement("p");
+    p.className = "panel-message";
     p.textContent = text;
     toolsGrid.replaceChildren(p);
 }
@@ -88,4 +154,5 @@ if (currentLocationId) {
     loadTools();
 } else {
     showMessage("Kein Standort ausgewählt");
+    document.getElementById("tool_count").textContent = "";
 }

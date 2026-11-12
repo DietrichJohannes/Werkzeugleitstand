@@ -1,0 +1,212 @@
+/* =========================================
+   Seitengerüst für einfache Unterseiten
+   (Übersicht, Dokumente, …)
+   Gleiches Schema wie die Management-Ansicht:
+   weiße Kopfzeile, grauer Hintergrund, Panels.
+
+   Aufbau:
+     <body class="page">
+       <header class="page-header">…</header>
+       <main class="page-main">
+         <section class="page-panel">
+           <div class="panel-toolbar">…</div>
+           <div class="panel-table">…<table>…</div>
+         </section>
+       </main>
+   ========================================= */
+
+.page {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--surface-soft);
+    color: var(--text);
+}
+
+[hidden] {
+    display: none !important;
+}
+
+
+/* ---------- Kopfzeile ---------- */
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-width: 0;
+}
+
+.page-back {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.page-title h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.page-title span {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.page-meta {
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+
+/* ---------- Inhalt ---------- */
+
+.page-main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 26px 28px 40px;
+}
+
+.page-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.panel-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.panel-toolbar h2 {
+    margin: 0 0 2px;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.panel-toolbar span {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.panel-search {
+    width: min(400px, 100%);
+    padding: 8px 10px;
+    font: inherit;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.panel-search:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: -1px;
+    border-color: var(--primary);
+}
+
+
+/* Tabelle im Panel: Rahmen kommt vom Panel, breite Tabellen scrollen */
+
+.panel-table {
+    overflow-x: auto;
+}
+
+.panel-table table {
+    margin: 0;
+    border: none;
+}
+
+.panel-table td {
+    vertical-align: middle;
+}
+
+.panel-empty {
+    padding: 32px 20px !important;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+
+/* Meldung statt Inhalt (Lädt…, leer, Fehler) – z. B. in Karten-Rastern */
+
+.panel-message {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 32px;
+    color: var(--text-muted);
+    text-align: center;
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+}
+
+/* Karten-Raster der Linienansicht: Abstand kommt von .page-main */
+.page-main > .line-grid {
+    margin-top: 0;
+}
+
+
+/* ---------- Mobil ---------- */
+
+@media (max-width: 750px) {
+    .page-header {
+        flex-wrap: wrap;
+        padding: 12px 16px;
+    }
+
+    .page-meta {
+        text-align: left;
+    }
+
+    .page-main {
+        padding: 16px;
+    }
+
+    .panel-toolbar {
+        padding: 14px 16px;
+    }
+}
+
+/* styles.css setzt #search fest auf 400px + Abstand unten */
+#search.panel-search {
+    width: min(400px, 100%);
+    margin: 0;
+    padding: 8px 10px;
+}
+
+
+/* ---------- Status-Chips (Farben wie in den Linienkarten) ---------- */
+
+.page .chip_bereit       { color: var(--primary); }
+.page .chip_aktiv        { color: var(--success); }
+.page .chip_wartung      { color: var(--danger); }
+.page .chip_verschrottet { color: #7a8592; }
+.page .chip_neutral      { color: var(--text-muted); }
+
+
+/* ---------- Kompakter Button in Tabellenzeilen ---------- */
+
+.page .button-small {
+    min-height: 30px;
+    padding: 4px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+}

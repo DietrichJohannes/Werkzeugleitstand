@@ -111,7 +111,7 @@ function handleCreate(): void
     $pdo->beginTransaction();
     try {
         $id = insertRow('failures', $values);
-        updateRow('tools', $values['tool_id'], ['status_id' => TOOL_STATUS_MAINTENANCE]);
+        updateToolTracked($values['tool_id'], ['status_id' => TOOL_STATUS_MAINTENANCE], "Ausfall #$id gemeldet");
 
         $pdo->commit();
     } catch (Throwable $e) {

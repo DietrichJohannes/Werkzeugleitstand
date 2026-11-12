@@ -1,4 +1,44 @@
+/* =========================================
+   Dokumente-Explorer
+   Grundgerüst: /assets/css/page.css
+   ========================================= */
+
 /* Spaltenbreiten der großen Werkzeugtabelle hier nicht anwenden */
 .documents-table th {
     width: auto;
+}
+
+.documents-table th:nth-child(2),
+.documents-table th:nth-child(3) {
+    width: 1%;
+}
+
+.document-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.document-link:hover span:last-child {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+.document-badge {
+    flex-shrink: 0;
+    padding: 2px 6px;
+    color: var(--danger);
+    border: 1px solid currentColor;
+    border-radius: var(--radius-sm);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.document-number {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }

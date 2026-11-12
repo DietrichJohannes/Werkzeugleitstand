@@ -155,23 +155,23 @@ h3 {
 }
 
 
-/* Karte */
+/* Karte – gleiche Formensprache wie Dialoge und Tabellen:
+   1px-Rahmen, kantige Ecken, Großbuchstaben-Labels.
+   Statusfarbe nur über --card-status (Kennbalken links + Chip). */
 
 .line-card {
-    position: relative;
+    --card-status: var(--text-muted);
 
-    min-height: 150px;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+
+    padding: 14px 16px 0 16px;
 
     background-color: var(--surface);
 
     border: 1px solid var(--border);
-    border-left: 5px solid #999;
-
-    border-radius: 6px;
-
-    display: flex;
-    flex-direction: column;
+    border-left: 4px solid var(--card-status);
+    border-radius: var(--radius-md);
 
     cursor: pointer;
 
@@ -180,34 +180,102 @@ h3 {
         border-color 0.15s ease;
 }
 
-
-/* Hover */
-
 .line-card:hover {
-    background-color: #f8f9fa;
-    border-color: #aeb6bf;
+    background-color: #fafbfc;
+    border-color: #98a4b0;
+    border-left-color: var(--card-status);
+}
+
+.line-card:focus-visible {
+    outline: 1px solid var(--primary);
+    outline-offset: 2px;
 }
 
 
-/* Überschrift */
+/* Kopf: Kennung + Status */
+
+.line-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 4px;
+}
+
+.line-card-eyebrow {
+    color: var(--text-muted);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.line-card [class^="chip_"] {
+    color: var(--card-status);
+}
 
 .line-card h3 {
-    margin: 0 0 18px 0;
+    margin: 0 0 12px 0;
+    padding-bottom: 12px;
+
+    border-bottom: 1px solid var(--border-light);
 
     color: var(--text);
 
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 700;
+
+    overflow-wrap: anywhere;
 }
 
 
-/* Informationen */
+/* Datenfelder */
 
-.line-info {
+.line-card-data {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
 
-    gap: 14px 20px;
+    gap: 10px 16px;
+
+    margin: 0 0 14px 0;
+}
+
+.line-card-data dt {
+    margin-bottom: 2px;
+
+    color: var(--text-muted);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.line-card-data dd {
+    margin: 0;
+
+    color: var(--text);
+
+    font-size: 14px;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* Fußzeile */
+
+.line-card-footer {
+    margin: auto -16px 0 -16px;
+    padding: 7px 16px;
+
+    background-color: var(--surface-soft);
+
+    border-top: 1px solid var(--border-light);
 
     color: var(--text-muted);
 
@@ -215,62 +283,26 @@ h3 {
 }
 
 
-/* Werte */
-
-.line-info strong {
-    display: block;
-
-    margin-top: 3px;
-    margin-bottom: 0;
-
-    color: var(--text);
-
-    font-size: 15px;
-    font-weight: 700;
-}
-
-
 /* =========================================
    Statusfarben der Karten
    ========================================= */
 
-.line-card.status-bereit {
-    border-left-color: #247afb;
-}
-
-.line-card.status-aktiv {
-    border-left-color: #40a83b;
-}
+.line-card.status-bereit       { --card-status: var(--primary); }
+.line-card.status-aktiv        { --card-status: var(--success); }
+.line-card.status-wartung      { --card-status: var(--danger); }
+.line-card.status-verschrottet { --card-status: #7a8592; }
 
 .line-card.status-wartung {
-    border-left-color: #d94343;
     background-color: #fff8f8;
 }
 
-.line-card.status-verschrottet {
-    border-left-color: magenta;
+.line-card.status-wartung .line-card-footer {
+    background-color: #fdeeee;
 }
 
-/* alten Pseudobalken abschalten */
-
-.line-card::before {
-    display: none;
-}
-
-/* Technische Kennzeichnung statt dekorativem Verlauf */
-
-.line-card::before {
-    content: "";
-
-    position: absolute;
-
-    top: -1px;
-    left: -1px;
-    bottom: -1px;
-
-    width: 4px;
-
-    background-color: var(--primary);
+.line-card.status-verschrottet h3,
+.line-card.status-verschrottet .line-card-data dd {
+    color: var(--text-muted);
 }
 
 
@@ -408,6 +440,60 @@ dialog.tool_dialog::backdrop {
 
 .tool-details {
     margin-top: 0;
+}
+
+
+/* Verlauf im Werkzeug-Dialog */
+
+.tool-history summary {
+    cursor: pointer;
+}
+
+.tool-history summary h3 {
+    display: inline;
+}
+
+.tool-history-list {
+    max-height: 220px;
+    overflow-y: auto;
+
+    margin: 10px 0 0 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+.tool-history-list li {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    column-gap: 10px;
+
+    padding: 6px 0;
+
+    border-bottom: 1px solid var(--border-light);
+
+    font-size: 13px;
+}
+
+.tool-history-time,
+.tool-history-meta {
+    color: var(--text-muted);
+}
+
+.tool-history-meta {
+    grid-column: 2;
+
+    font-size: 12px;
+}
+
+@media (max-width: 480px) {
+    .tool-history-list li {
+        grid-template-columns: 1fr;
+    }
+
+    .tool-history-meta {
+        grid-column: 1;
+    }
 }
 
 
@@ -830,22 +916,6 @@ th:nth-child(8) { width: 12%; } /* Aktionen */
     font-weight: 700;
 
     text-transform: uppercase;
-}
-
-.line-card.status-bereit::before {
-    background-color: #247afb;
-}
-
-.line-card.status-aktiv::before {
-    background-color: #18d862;
-}
-
-.line-card.status-wartung::before {
-    background-color: #fd2424;
-}
-
-.line-card.status-verschrottet::before {
-    background-color: magenta;
 }
 
 #search {

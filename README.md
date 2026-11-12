@@ -76,6 +76,69 @@ Apache (VirtualHost):
 </VirtualHost>
 ```
 
+### Anmeldung (Kerberos / AD)
+
+Die Anmeldung läuft per Single Sign-On: Apache prüft das Kerberos-Ticket des Windows-Logins,
+PHP liest danach Name, E-Mail und Gruppen per LDAP aus dem AD (`src/ad_login.php`).
+
+| AD-Gruppe (`config.php`)      | Rolle        | Darf                        |
+|-------------------------------|--------------|-----------------------------|
+| `auth.ldap.group_einrichter`  | `einrichter` | alles inkl. Stammdaten      |
+| `auth.ldap.group_user`        | `user`       | Status, Ausfälle, Reparaturen, Reinigungen |
+| keine der beiden              | `beobachter` | nur lesen                   |
+
+Verschachtelte Gruppen zählen mit. Rollenänderungen im AD greifen nach spätestens
+`auth.role_refresh_minutes` (Standard 15). Ist das AD nicht erreichbar, gibt es nur Leserechte.
+
+**1. Im AD (einmalig)**
+
+- Zwei Gruppen anlegen, z. B. `GG-Werkzeugleitstand-Einrichter` und `GG-Werkzeugleitstand-Benutzer`.
+- Servicebenutzer für **Kerberos** (z. B. `svc-wzl-http`) mit SPN und Keytab, auf einem DC:
+  ```
+  setspn -S HTTP/werkzeuge.intranet.firma.de FIRMA\svc-wzl-http
+  ktpass -princ HTTP/werkzeuge.intranet.firma.de@FIRMA.LOCAL -mapuser FIRMA\svc-wzl-http ^
+         -pass * -crypto AES256-SHA1 -ptype KRB5_NT_PRINCIPAL -out werkzeugleitstand.keytab
+  ```
+  Beim Benutzer „Dieses Konto unterstützt Kerberos AES 256“ aktivieren.
+- Servicebenutzer für **LDAP** (z. B. `svc-werkzeugleitstand`), normales Konto mit Leserechten,
+  Passwort läuft nicht ab. Kann auch derselbe wie oben sein.
+
+**2. Auf dem Server**
+
+```bash
+apt install libapache2-mod-auth-gssapi php-ldap
+a2enmod auth_gssapi
+install -o root -g www-data -m 640 werkzeugleitstand.keytab /etc/apache2/werkzeugleitstand.keytab
+```
+
+`/etc/krb5.conf` muss den AD-Realm kennen (`default_realm = FIRMA.LOCAL`, KDCs per DNS).
+Im VirtualHost (zusätzlich zum Block oben):
+
+```apache
+    <Location />
+        AuthType GSSAPI
+        AuthName "Werkzeugleitstand"
+        GssapiCredStore keytab:/etc/apache2/werkzeugleitstand.keytab
+        GssapiAllowedMech krb5
+        GssapiLocalName Off
+        # Fallback-Passwortabfrage für Geräte ohne Domänenanmeldung, sonst Off:
+        GssapiBasicAuth Off
+        Require valid-user
+    </Location>
+```
+
+Danach `auth.ldap` in `config/config.php` ausfüllen (Vorlage: `config/config.example.php`)
+und `auth.dev_fake_role` auf `null` setzen.
+
+**3. Im Browser**
+
+- Die Seite immer über den Namen aus dem SPN aufrufen, nicht über die IP.
+- Edge/Chrome: Seite muss in der Zone „Lokales Intranet“ sein (per GPO).
+- Firefox: `network.negotiate-auth.trusted-uris` = `werkzeuge.intranet.firma.de` (per GPO/Policy).
+
+**Test:** `https://werkzeuge.intranet.firma.de/api/me.php` zeigt die Rechte des angemeldeten
+Benutzers. Probleme stehen im Apache-Errorlog (Kerberos) bzw. PHP-Errorlog (`AD-Login: …`).
+
 nginx:
 
 ```nginx
@@ -95,14 +158,10 @@ server {
 
 ## Checkliste vor dem Produktivbetrieb
 
-- [ ] **Login einbauen.** Bisher gibt es keinen Login. Ohne `dev_fake_role` antwortet
-      die API deshalb überall mit „Nicht angemeldet“. Ideal für das Firmen-Intranet:
-      Anmeldung über Active Directory / LDAP oder Single Sign-On. Nach dem Login
-      müssen `$_SESSION['user_id']` und `$_SESSION['role']` gesetzt werden
-      (siehe `src/auth.php`).
-- [ ] Die Benutzer-ID beim Anlegen von Reparaturen und Ausfällen kommt noch fest als `1` aus
-      `public/components/tool_info_dialog.js`. Nach dem Login sollte sie aus der Session
-      kommen.
+- [ ] **Kerberos/AD-Login einrichten** (siehe „Anmeldung (Kerberos / AD)“): Gruppen,
+      Servicebenutzer, Keytab, `auth.ldap` in `config/config.php`.
+- [ ] Migrationen aus `database/migrations/` in der Produktions-DB einspielen
+      (u. a. `001_users.sql`).
 - [ ] Datenbank-Passwort ändern. Das alte Passwort steht noch in der Git-Historie.
 - [ ] Eigenen Datenbank-Benutzer mit minimalen Rechten verwenden
       (SELECT/INSERT/UPDATE/DELETE nur auf die Datenbank `lokring`).

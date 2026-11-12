@@ -7,33 +7,50 @@ sort($slideFiles);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reinigung</title>
+    <title>Reinigung – Anleitung</title>
     <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/page.css">
     <link rel="stylesheet" type="text/css" href="../styles.css">
 </head>
-<body>
+<body class="page">
 
-<button id="back" class="button_neutral">Zurück</button>
+<header class="page-header">
+    <div class="page-header-left">
+        <!-- Verhalten: ../presentation.js (zurück oder Tab schließen) -->
+        <button type="button" id="back" class="button_neutral page-back">Zurück</button>
 
-<div id="presentation">
+        <div class="page-title">
+            <h1>Reinigung</h1>
+            <span>Anleitung – am Ende Reinigung quittieren</span>
+        </div>
+    </div>
 
-    <?php foreach ($slideFiles as $index => $file): ?>
-        <section class="slide <?= $index === 0 ? 'active' : '' ?>">
-            <?php include $file; ?>
-        </section>
-    <?php endforeach; ?>
+    <div class="page-meta">Pfeiltasten: blättern</div>
+</header>
 
-</div>
+<main class="page-main">
+    <section class="page-panel presentation-panel">
 
-<div class="controls">
-    <button id="prev" class="button_neutral">‹</button>
+        <div id="presentation">
+            <?php foreach ($slideFiles as $index => $file): ?>
+                <section class="slide <?= $index === 0 ? 'active' : '' ?>">
+                    <?php include $file; ?>
+                </section>
+            <?php endforeach; ?>
+        </div>
 
-    <span id="counter">
-        1 / <?= count($slideFiles) ?>
-    </span>
+        <div class="controls">
+            <button id="prev" class="button_neutral" aria-label="Vorherige Folie">‹ Zurück</button>
 
-    <button id="next" class="button_neutral">›</button>
-</div>
+            <span id="counter">
+                1 / <?= count($slideFiles) ?>
+            </span>
+
+            <button id="next" class="button_neutral" aria-label="Nächste Folie">Weiter ›</button>
+        </div>
+
+    </section>
+</main>
 
 <script>
     window.totalSlides = <?= count($slideFiles) ?>;

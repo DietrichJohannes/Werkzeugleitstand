@@ -5,23 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Werkzeugpool</title>
     <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/page.css">
 </head>
-<body>
-    <button class="button_neutral" onclick="history.back()">Zurück</button>
-    <br>
-    <br>
-    <br>
-    <br>
+<body class="page">
 
-    <!-- Name wird von script.js über /api/locations.php geladen -->
-    <h1 id="location_title">Werkzeugpool</h1>
-    <h3>Werkzeug durch klicken öffnen</h3>
-    <br>
-    <br>
+    <header class="page-header">
+        <div class="page-header-left">
+            <a class="button_neutral page-back" href="/">Zurück</a>
 
-    <div class="line-grid" id="tools_grid">
-        <p>Lädt…</p>
-    </div>
+            <div class="page-title">
+                <!-- Name wird von script.js über /api/locations.php geladen -->
+                <h1 id="location_title">Werkzeugpool</h1>
+                <span>Werkzeug durch Klicken öffnen</span>
+            </div>
+        </div>
+
+        <div class="page-meta" id="tool_count">Lädt…</div>
+    </header>
+
+    <main class="page-main">
+        <div class="line-grid" id="tools_grid">
+            <p class="panel-message">Lädt…</p>
+        </div>
+    </main>
 
     <?php include __DIR__ . '/../../components/tool_info_dialog.php'; ?>
     <?php include __DIR__ . '/../../components/report_dialog.php'; ?>

@@ -16,7 +16,18 @@
             <span>Lokring</span>
         </div>
 
-        <div class="home-updated" id="last_update">Lädt…</div>
+        <div class="home-header-right">
+            <div class="home-updated" id="last_update">Lädt…</div>
+
+            <!-- Name + Initialen werden von home.js über /api/me.php gefüllt -->
+            <div class="home-user" id="home_user" hidden>
+                <div class="home-user-text">
+                    <strong id="home_user_name"></strong>
+                    <span id="home_user_role"></span>
+                </div>
+                <div class="home-avatar" id="home_user_avatar" aria-hidden="true"></div>
+            </div>
+        </div>
     </header>
 
     <div class="home-layout">

@@ -40,29 +40,61 @@ if (isset($_GET['file'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dokumente</title>
+    <title>Dokumente – Lokringwerkzeuge</title>
     <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/page.css">
     <link rel="stylesheet" type="text/css" href="/documents/styles.css">
 </head>
-<body>
-    <button class="button_neutral" onclick="location.href = '/'">Zurück</button>
-    <br>
-    <br>
-    <h1>Dokumente</h1>
-    <h3>Verfügbare Dokumente auf dem Server</h3>
+<body class="page">
 
-    <table class="documents-table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Größe</th>
-                <th>Geändert</th>
-            </tr>
-        </thead>
-        <tbody id="documents_list">
-            <tr><td colspan="3">Lädt…</td></tr>
-        </tbody>
-    </table>
+    <header class="page-header">
+        <div class="page-header-left">
+            <a class="button_neutral page-back" href="/">Zurück</a>
+
+            <div class="page-title">
+                <h1>Dokumente</h1>
+                <span>Stücklisten (BoM) zu den Werkzeugen</span>
+            </div>
+        </div>
+
+        <div class="page-meta" id="documents_count">Lädt…</div>
+    </header>
+
+    <main class="page-main">
+        <section class="page-panel">
+
+            <div class="panel-toolbar">
+                <div>
+                    <h2>Verfügbare Dokumente</h2>
+                    <span>PDF öffnet sich in einem neuen Tab</span>
+                </div>
+
+                <input
+                    type="search"
+                    id="documents_search"
+                    class="panel-search"
+                    placeholder="Dateiname ..."
+                    aria-label="Dokumente durchsuchen"
+                >
+            </div>
+
+            <div class="panel-table">
+                <table class="documents-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Größe</th>
+                            <th>Geändert</th>
+                        </tr>
+                    </thead>
+                    <tbody id="documents_list">
+                        <tr><td colspan="3" class="panel-empty">Lädt…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+    </main>
 
     <script src="/assets/js/api.js"></script>
     <script src="/documents/script.js"></script>

@@ -7,23 +7,24 @@
     <title>Management-Ansicht – Lokringwerkzeuge</title>
 
     <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/page.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/charts.css">
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 
-<body class="mgmt">
+<body class="page mgmt">
 
-    <header class="mgmt-header">
-        <div class="mgmt-header-left">
-            <a class="button_neutral mgmt-back" href="/">← Zurück</a>
+    <header class="page-header">
+        <div class="page-header-left">
+            <a class="button_neutral page-back" href="/">Zurück</a>
 
-            <div class="mgmt-title">
+            <div class="page-title">
                 <h1>Management-Ansicht</h1>
                 <span>Lokringwerkzeuge – aktueller Status</span>
             </div>
         </div>
 
-        <div class="mgmt-updated" id="last_update">Lädt…</div>
+        <div class="page-meta" id="last_update">Lädt…</div>
     </header>
 
     <main class="mgmt-main">

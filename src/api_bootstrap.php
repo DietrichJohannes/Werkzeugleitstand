@@ -42,16 +42,11 @@ date_default_timezone_set(API_TIMEZONE);
 require_once __DIR__ . '/database.php'; // stellt db() und config() bereit
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/tool_status.php';
+require_once __DIR__ . '/tool_events.php';
 
 // ---------- Session ----------
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start([
-        'cookie_httponly' => true,
-        'cookie_samesite' => 'Strict',
-        'cookie_secure'   => (bool)config('session.cookie_secure', false),
-    ]);
-}
+require_once __DIR__ . '/session.php';
 
 // ---------- Zentrale Fehlerbehandlung ----------
 
@@ -287,6 +282,44 @@ function requireScrapPermissionForChange(int $toolId, int $newStatusId): void
     }
 }
 
+// ---------- Schutz vor CSRF ----------
+
+/*
+ * Schreibende Requests nur von der eigenen Seite.
+ *
+ * Mit Kerberos meldet der Browser den Benutzer auch bei Requests
+ * an, die eine FREMDE Webseite auslöst – das SameSite-Cookie
+ * schützt dann nicht mehr. Deshalb zusätzlich:
+ *
+ *  1. Header "X-Requested-With: fetch" (setzt apiRequest() in
+ *     assets/js/api.js). Fremde Seiten können eigene Header nur
+ *     per CORS-Preflight senden – den beantwortet die API nicht.
+ *  2. Sec-Fetch-Site / Origin, falls der Browser sie mitschickt,
+ *     müssen zur eigenen Seite passen.
+ */
+function requireSameOriginRequest(): void
+{
+    if (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') !== 'fetch') {
+        sendError(403, 'Anfrage abgelehnt (fehlender Header)');
+    }
+
+    $fetchSite = $_SERVER['HTTP_SEC_FETCH_SITE'] ?? null;
+    if ($fetchSite !== null && $fetchSite !== 'same-origin') {
+        sendError(403, 'Anfrage abgelehnt (fremde Seite)');
+    }
+
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? null;
+    if ($origin !== null) {
+        $originHost = parse_url($origin, PHP_URL_HOST);
+        $originPort = parse_url($origin, PHP_URL_PORT);
+        $originHostWithPort = $originPort ? "$originHost:$originPort" : $originHost;
+
+        if (!is_string($originHost) || strcasecmp($originHostWithPort, $_SERVER['HTTP_HOST'] ?? '') !== 0) {
+            sendError(403, 'Anfrage abgelehnt (fremde Herkunft)');
+        }
+    }
+}
+
 // ---------- Router ----------
 
 /*
@@ -307,6 +340,10 @@ function handleRequest(array $routes): void
     }
 
     [$permission, $handler] = $routes[$method];
+
+    if (!in_array($method, ['GET', 'HEAD'], true)) {
+        requireSameOriginRequest();
+    }
 
     requirePermission($permission);
 

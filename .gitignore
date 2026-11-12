@@ -10,3 +10,8 @@ Thumbs.db
 
 # Hochgeladene Dokumente
 /storage/
+
+# Claude Code
+/.claude/
+/CLAUDE.md
+CLAUDE.local.md

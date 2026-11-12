@@ -170,17 +170,28 @@ function handleCreate(): void
     $jawSetId   = validateToolField('jaw_set_id',  $data['jaw_set_id'] ?? null);
     $locationId = validateToolField('location_id', $data['location_id'] ?? null);
 
-    $stmt = db()->prepare('
-        INSERT INTO tools (name, body_id, jaw_set_id, location_id, status_id)
-        VALUES (?, ?, ?, ?, ?)
-    ');
-    // neue Werkzeuge sind immer "Bereit"
-    $stmt->execute([$name, $bodyId, $jawSetId, $locationId, TOOL_STATUS_READY]);
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $id = insertRow('tools', [
+            'name'        => $name,
+            'body_id'     => $bodyId,
+            'jaw_set_id'  => $jawSetId,
+            'location_id' => $locationId,
+            'status_id'   => TOOL_STATUS_READY,   // neue Werkzeuge sind immer "Bereit"
+        ]);
+        recordToolEvent($id, TOOL_EVENT_CREATED, null, (string)$locationId, 'Werkzeug angelegt');
+
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;   // zentrale Fehlerbehandlung
+    }
 
     sendJson([
         'success' => true,
         'message' => 'Werkzeug wurde erstellt',
-        'tool_id' => (int)db()->lastInsertId(),
+        'tool_id' => $id,
     ], 201);
 }
 
@@ -215,23 +226,21 @@ function handleUpdate(): void
         sendError(400, 'Keine Felder zum Ändern übergeben');
     }
 
-    $setParts = [];
-    $params   = [];
+    $values = [];
     foreach ($data as $field => $value) {
-        $setParts[] = $allowedFields[$field] . ' = ?'; // Spaltenname kommt aus Whitelist, nie vom Client
-        $params[]   = validateToolField($field, $value);
+        // Spaltenname kommt aus der Whitelist, nie vom Client
+        $values[$allowedFields[$field]] = validateToolField($field, $value);
     }
-    $params[] = $id;
 
     requireToolExists($id);
 
-    if (isset($data['status_id'])) {
-        requireScrapPermissionForChange($id, (int)$data['status_id']);
-        requireMaintenanceClosed($id, (int)$data['status_id']);
+    if (isset($values['status_id'])) {
+        requireScrapPermissionForChange($id, $values['status_id']);
+        requireMaintenanceClosed($id, $values['status_id']);
     }
 
-    $stmt = db()->prepare('UPDATE tools SET ' . implode(', ', $setParts) . ' WHERE id = ?');
-    $stmt->execute($params);
+    // ändert nur, was sich wirklich unterscheidet, und schreibt den Verlauf
+    updateToolTracked($id, $values);
 
     sendJson([
         'success' => true,
@@ -259,8 +268,19 @@ function handleDelete(): void
         }
     }
 
-    $stmt = db()->prepare('DELETE FROM tools WHERE id = ?');
-    $stmt->execute([$id]);
+    // Nur Werkzeuge ohne Ausfälle/Reparaturen/Reinigungen kommen hier an
+    // (z. B. versehentlich angelegte) – ihr Verlauf wird mitgelöscht.
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare('DELETE FROM tool_events WHERE tool_id = ?')->execute([$id]);
+        deleteRow('tools', $id);
+
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;   // zentrale Fehlerbehandlung
+    }
 
     sendJson(['success' => true, 'message' => 'Werkzeug wurde gelöscht']);
 }

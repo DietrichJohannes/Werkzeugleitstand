@@ -1,3 +1,10 @@
+<?php
+declare(strict_types=1);
+
+// Nur für Benutzer mit Recht 'admin.access' (siehe src/auth.php).
+require_once __DIR__ . '/../../../src/page_bootstrap.php';
+requirePagePermission('admin.access');
+?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -7,10 +14,25 @@
     <title>Werkzeugleitstand – Administration</title>
 
     <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/page.css">
     <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 
-<body>
+<body class="page">
+
+<header class="page-header">
+    <div class="page-header-left">
+        <a class="button_neutral page-back" href="/">Zurück</a>
+
+        <div class="page-title">
+            <h1>Verwaltung</h1>
+            <span>Stammdaten pflegen</span>
+        </div>
+    </div>
+
+    <!-- wird von script.js je Bereich gesetzt -->
+    <div class="page-meta" id="page_breadcrumb"></div>
+</header>
 
 <div class="admin-layout">
 
@@ -20,23 +42,6 @@
 
     <aside class="admin-sidebar">
 
-        <div class="admin-logo">
-            <strong>Werkzeugleitstand</strong>
-            <span>ADMINISTRATION</span>
-        </div>
-
-
-        <div class="nav-section">
-
-            <div class="nav-section-title">
-                Übersicht
-            </div>
-
-            <a href="/">
-                Dashboard
-            </a>
-
-        </div>
 
 
         <div class="nav-section">
@@ -96,28 +101,15 @@
 
     <main class="admin-main">
 
-        <header class="admin-header">
-
-            <div class="admin-header-title" id="page_breadcrumb">
-                ADMIN / TOOLS
-            </div>
-
-            <div class="admin-user">
-                Administrator
-            </div>
-
-        </header>
-
-
         <div class="admin-content">
 
             <!-- Seitenüberschrift -->
 
-            <div class="page-header">
+            <div class="section-header">
 
                 <div>
 
-                    <h1 id="page_title">Werkzeuge</h1>
+                    <h2 id="page_title">Werkzeuge</h2>
 
                     <p class="page-description" id="page_description">
                         Werkzeugstammdaten verwalten.

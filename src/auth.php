@@ -10,14 +10,22 @@ declare(strict_types=1);
  *  Rollen umbauen oder neue hinzufügen, ohne die Endpunkte
  *  anzufassen.
  *
- *  Erwartet nach dem Login in der Session:
- *    $_SESSION['user_id'] = 42;
- *    $_SESSION['role']    = 'user';   // 'beobachter' | 'user' | 'einrichter'
+ *  Wer angemeldet ist und welche Rolle er hat, ermittelt
+ *  src/ad_login.php (Kerberos + AD-Gruppen) und legt es in der
+ *  Session ab ('user_id', 'username', 'role', 'role_checked_at').
+ *  Rollen: 'beobachter' | 'user' | 'einrichter'
  */
 
 const ROLE_BEOBACHTER = 'beobachter';
 const ROLE_USER       = 'user';
 const ROLE_EINRICHTER = 'einrichter';
+
+// Anzeigenamen der Rollen (z. B. im Kopf der Startseite)
+const ROLE_LABELS = [
+    ROLE_BEOBACHTER => 'Beobachter',
+    ROLE_USER       => 'Benutzer',
+    ROLE_EINRICHTER => 'Einrichter',
+];
 
 /*
  * Rechteverwaltung pro API
@@ -88,34 +96,44 @@ const PERMISSIONS = [
  *  Ist in config/config.php 'auth.dev_fake_role' gesetzt, gilt
  *  JEDER Aufruf als angemeldet mit dieser Rolle.
  *  Aus Sicherheitsgründen wirkt das nur bei
- *  'environment' => 'development'.
+ *  'environment' => 'development' UND mit dem PHP-Testserver
+ *  (php -S …), nie unter Apache.
  */
 function devFakeRole(): ?string
 {
     $role = config('auth.dev_fake_role');
 
-    if ($role === null || !isDevelopment()) {
+    // Nur mit dem PHP-Testserver (php -S). Unter Apache greift die
+    // Test-Rolle nie – auch nicht bei versehentlich falscher Config.
+    if ($role === null || !isDevelopment() || PHP_SAPI !== 'cli-server') {
         return null;
     }
 
     return (string)$role;
 }
 
+/*
+ * Angemeldeter Benutzer: ['id' => int, 'role' => string, 'name' => string] oder null.
+ * Ohne Test-Rolle kommt der Benutzer aus Kerberos + AD
+ * (src/ad_login.php). Pro Request nur einmal ermittelt.
+ */
 function currentUser(): ?array
 {
     $fakeRole = devFakeRole();
     if ($fakeRole !== null) {
-        return ['id' => 0, 'role' => $fakeRole];
+        return ['id' => 0, 'role' => $fakeRole, 'name' => 'Test Benutzer'];
     }
 
-    if (!isset($_SESSION['user_id'], $_SESSION['role'])) {
-        return null;
+    static $resolved = false;
+    static $user = null;
+
+    if (!$resolved) {
+        require_once __DIR__ . '/ad_login.php';
+        $user = directoryUser();
+        $resolved = true;
     }
 
-    return [
-        'id'   => (int)$_SESSION['user_id'],
-        'role' => (string)$_SESSION['role'],
-    ];
+    return $user;
 }
 
 /*
