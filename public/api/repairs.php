@@ -92,6 +92,8 @@ function handleCreate(): void
     $toolId = $values['tool_id'];
 
     requireExists('tools', $toolId, 'Werkzeug nicht gefunden');
+    // Die Reparatur setzt das Werkzeug auf "Bereit" – bei einem verschrotteten
+    // wäre das ein Zurückholen, das nur Einrichter dürfen.
     requireScrapPermissionForChange($toolId, TOOL_STATUS_READY);
     if ($values['failure_id'] !== null) {
         requireOpenFailureOfTool($values['failure_id'], $toolId);

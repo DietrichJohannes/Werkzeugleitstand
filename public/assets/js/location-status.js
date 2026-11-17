@@ -3,13 +3,14 @@
 // =========================================
 // Wird von der Startseite und der Management-Ansicht genutzt,
 // damit beide Seiten immer denselben Status anzeigen.
-// Grenzwerte nur HIER ändern.
+// Grenzwerte nur HIER ändern. Farben der Stufen: --level-* in styles.css.
 
 const STATUS_THRESHOLDS = {
-    defectWarning: 25,    // ab 25 % in Wartung: Warnung (gelb)
-    defectCritical: 50,   // ab 50 % in Wartung: kritisch (rot)
+    defectWarning: 25,    // ab 25 % in Wartung: Warnung
+    defectCritical: 50,   // ab 50 % in Wartung: kritisch
 };
 
+// Sortierreihenfolge: kritisch zuerst
 const STATUS_ORDER = { critical: 0, warning: 1, normal: 2 };
 
 /*
@@ -24,8 +25,9 @@ function evaluateDefectPercent(percent) {
 
 /*
  * Bewertet einen Standort aus service.php?service=tool_counter_by_location.
- * min_stock = Mindestbestand: Hat der Standort so viele Werkzeuge oder
- * weniger, ist er kritisch. Ist kein Mindestbestand gepflegt, entfällt die Prüfung.
+ * min_stock = Mindestbestand: Hat der Standort weniger Werkzeuge als das,
+ * ist er kritisch. Ist kein Mindestbestand gepflegt (null), entfällt die Prüfung.
+ * Gezählt wird tools_all = Bestand ohne verschrottete, inkl. Werkzeuge in Wartung.
  *
  * Rückgabe: { level: 'normal' | 'warning' | 'critical', reasons: [...] }
  */

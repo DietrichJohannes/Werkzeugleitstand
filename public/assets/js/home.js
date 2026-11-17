@@ -3,6 +3,7 @@
 // =========================================
 
 // Benötigt: /assets/js/api.js, /assets/js/location-status.js
+// Benutzer + Rechte (data-permission) übernimmt /assets/js/app-header.js
 
 const REFRESH_SECONDS = 60;   // Leitstand aktualisiert sich selbst
 
@@ -138,7 +139,7 @@ function setText(id, value) {
 
 function showMessage(text) {
     const p = document.createElement('p');
-    p.className = 'home-message';
+    p.className = 'panel-message';
     p.textContent = text;
     locationGrid.replaceChildren(p);
 }
@@ -146,8 +147,6 @@ function showMessage(text) {
 // ---------- Start + automatische Aktualisierung ----------
 
 async function refresh() {
-    applyPermissions();
-
     const results = await Promise.allSettled([loadKpis(), loadLocations()]);
     const failed = results.find(result => result.status === 'rejected');
 
@@ -184,68 +183,3 @@ document.addEventListener('visibilitychange', () => {
         refresh();
     }
 });
-
-// ---------- Berechtigungen ----------
-// Blendet nur Elemente aus. Geprüft wird immer auf dem Server.
-
-async function applyPermissions() {
-    try {
-        const response = await fetch('/api/me.php', { cache: 'no-store' });
-
-        // Bei 401/403 gibt es keine Rechte -> alles ausblenden
-        const data = response.ok ? await response.json() : {};
-        const allowed = new Set(data.permissions ?? []);
-
-        renderUser(data.user ?? null);
-
-        document.querySelectorAll('[data-permission]').forEach(element => {
-            element.hidden = !allowed.has(element.dataset.permission);
-        });
-    } catch (error) {
-        // Netzwerkfehler: aktuellen Zustand beibehalten
-        console.error('Berechtigungen konnten nicht geladen werden:', error);
-    }
-}
-
-// ---------- Angemeldeter Benutzer (Kopfzeile) ----------
-
-function renderUser(user) {
-    const box = document.getElementById('home_user');
-
-    if (!user || !user.name) {
-        box.hidden = true;
-        return;
-    }
-
-    document.getElementById('home_user_name').textContent = user.name;
-    document.getElementById('home_user_role').textContent = user.role_label ?? user.role ?? '';
-    document.getElementById('home_user_avatar').textContent = getInitials(user.name);
-    box.title = `Angemeldet als ${user.name}`;
-    box.hidden = false;
-}
-
-/*
- * "Johannes Dietrich"  → "JD"
- * "Dietrich, Johannes" → "JD"  (AD-Schreibweise "Nachname, Vorname")
- * "jdietrich"          → "JD"  (nur Anmeldename: erste zwei Buchstaben)
- */
-function getInitials(name) {
-    let parts = String(name).trim().split(/\s+/);
-
-    if (name.includes(',')) {
-        const [last, first] = name.split(',', 2).map(part => part.trim());
-        parts = [first, last].filter(Boolean).join(' ').split(/\s+/);
-    }
-
-    parts = parts.filter(Boolean);
-
-    if (parts.length === 0) {
-        return '?';
-    }
-
-    const initials = parts.length === 1
-        ? parts[0].slice(0, 2)
-        : parts[0][0] + parts[parts.length - 1][0];
-
-    return initials.toUpperCase();
-}

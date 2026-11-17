@@ -2,6 +2,8 @@
 // Dateiübersicht (Dokumente-Explorer)
 // =========================================
 // Benötigt: /assets/js/api.js
+// Links zeigen auf /documents/?file=<name> – index.php liefert die PDF
+// erst nach Rechteprüfung aus (die Dateien liegen außerhalb von public/).
 
 const documentsSearch = document.getElementById('documents_search');
 let documentsTotal = 0;

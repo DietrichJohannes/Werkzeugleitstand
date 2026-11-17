@@ -39,6 +39,7 @@ function loadNameMap(string $table): array
     return db()->query("SELECT id, name FROM $table")->fetchAll(PDO::FETCH_KEY_PAIR);
 }
 
+// Beim Eintrag "Angelegt" steht in new_value der Standort (siehe tools.php POST).
 function eventValueLabel(string $field, ?string $value, array $maps): ?string
 {
     if ($value === null || $value === '') {

@@ -18,6 +18,8 @@ require_once __DIR__ . '/../../src/api_bootstrap.php';
  */
 
 // ---------- Felder ----------
+// JSON-Feld => DB-Spalte. Dient im PATCH als Whitelist: Spaltennamen
+// kommen dadurch nie vom Client.
 
 // Felder, die jeder mit 'tools.update_state' ändern darf
 const TOOL_STATE_FIELDS = [
@@ -33,7 +35,6 @@ const TOOL_MASTERDATA_FIELDS = [
 ];
 
 // ---------- Formatierung ----------
-// Status-Texte: src/tool_status.php
 
 function formatTool(array $row): array
 {
@@ -122,9 +123,6 @@ function requireToolExists(int $id): void
 
 // ---------- Validierung ----------
 
-/*
- * Prüft ein einzelnes Feld und gibt den bereinigten Wert zurück.
- */
 function validateToolField(string $field, mixed $value): string|int
 {
     return match ($field) {

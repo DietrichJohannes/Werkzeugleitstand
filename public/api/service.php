@@ -11,21 +11,20 @@ require_once __DIR__ . '/../../src/api_bootstrap.php';
  *
  *  Alle Antworten: { "success": true, "data": ... }
  *
- *  service                     alt   Ergebnis
- *  --------------------------  ----  -------------------------------------
- *  tool_counter                 1    Anzahl Werkzeuge gesamt/aktiv/Wartung
- *  jaw_sets                     2    alle Backensets mit Anschluss
- *  bodies                       3    alle Körper
- *  parts_counter                4    Anzahl Teile
- *  location_counter             5    Anzahl Bereiche
- *  body_counter                 6    Anzahl Körper
- *  jaw_set_counter              7    Anzahl Backensets
- *  parts                        8    alle Teile mit Backenset-Name
- *  connections                  9    alle Anschlüsse
- *  connection_counter          10    Anzahl Anschlüsse
- *  failure_cause_counter       13    Anzahl Ausfallursachen
- *  tool_counter_by_location    11    Werkzeuge + Defektquote pro Bereich
- *  api_info                    12    Informationen über die API
+ *  service                     Ergebnis
+ *  --------------------------  ------------------------------------------
+ *  tool_counter                Anzahl Werkzeuge je Status (inkl. verschrottet)
+ *  tool_counter_by_location    Werkzeuge + Anteil in Wartung je Standort
+ *  jaw_sets                    alle Backensets mit Verbindung
+ *  bodies                      alle Grundkörper
+ *  parts                       alle Bauteile mit Backenset-Name
+ *  connections                 alle Verbindungen
+ *  parts_counter, location_counter, body_counter, jaw_set_counter,
+ *  connection_counter, failure_cause_counter
+ *                              Anzahl Einträge der jeweiligen Tabelle
+ *  api_info                    Version und Umgebung der API
+ *
+ *  Neuer Service: Funktion schreiben und in DASHBOARD_SERVICES eintragen.
  */
 
 const DASHBOARD_SERVICES = [
@@ -59,6 +58,10 @@ function fetchAllRows(string $sql): array
 
 // ---------- Services ----------
 
+/*
+ * tool_quantity zählt ALLE Werkzeuge, auch verschrottete – den
+ * aktuellen Bestand erhält man mit tool_quantity - tool_scrapped.
+ */
 function serviceToolCounter(): array
 {
     $row = db()->query('
@@ -193,6 +196,12 @@ function api_info(): array
     ];
 }
 
+/*
+ * Grundlage der Standort-Bewertung (assets/js/location-status.js).
+ * tools_all     = Bestand: Werkzeuge ohne verschrottete
+ * tools_defect  = Werkzeuge in Wartung
+ * min_stock     = Mindestbestand des Standorts, null = keiner festgelegt
+ */
 function serviceToolCounterByLocation(): array
 {
     $rows = fetchAllRows('
@@ -200,7 +209,7 @@ function serviceToolCounterByLocation(): array
             locations.id            AS location_id,
             locations.name          AS location,
             locations.min_stock AS min_stock,
-            COUNT(tools.id)         AS tools_all,
+            SUM(CASE WHEN tools.status_id <> ' . TOOL_STATUS_SCRAPPED . ' THEN 1 ELSE 0 END) AS tools_all,
             SUM(CASE WHEN tools.status_id = ' . TOOL_STATUS_MAINTENANCE . ' THEN 1 ELSE 0 END) AS tools_defect
         FROM locations
         LEFT JOIN tools ON tools.location_id = locations.id

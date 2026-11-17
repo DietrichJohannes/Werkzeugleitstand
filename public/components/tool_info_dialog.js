@@ -6,6 +6,11 @@
 //           /components/parts_dialog.js (+ parts_dialog.php)
 // Die einbindende Seite muss eine Funktion loadTools() haben,
 // die nach dem Speichern die Liste neu lädt.
+// formatDate() stammt aus report_dialog.js.
+//
+// Einstieg: openToolDialog(). closeToolDialog(), saveToolChanges(),
+// createRepair() und openToolParts() werden per onclick aus
+// tool_info_dialog.php aufgerufen.
 
 const ToolInfoDialog = document.getElementById("tool_info_dialog");
 const LocationSelect = document.getElementById("location_dropdown");

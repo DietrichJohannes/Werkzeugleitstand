@@ -1,44 +1,12 @@
 /* =========================================
    Management-Ansicht
-   Nutzt die Variablen aus /assets/css/styles.css,
-   mit Ersatzwerten, falls eine davon fehlt.
+   Grundgerüst: /assets/css/page.css
+   Kennzahl-Karten, Statusstufen (is-normal/…),
+   .status-dot: /assets/css/styles.css
    ========================================= */
-
-.mgmt {
-    --m-surface: var(--surface, #ffffff);
-    --m-soft:    var(--surface-soft, #f4f6f8);
-    --m-border:  var(--border, #d8dee4);
-    --m-text:    var(--text, #1f2328);
-    --m-muted:   var(--text-muted, #656d76);
-    --m-radius:  var(--radius-sm, 6px);
-
-    --m-ok:       #2e8b3a;
-    --m-warn:     #c98a00;
-    --m-critical: #d23f3f;
-
-    margin: 0;
-    min-height: 100vh;
-    background: var(--m-soft);
-    color: var(--m-text);
-}
 
 .hidden {
     display: none !important;
-}
-
-/* Statusfarbe pro Element: .is-normal / .is-warning / .is-critical */
-
-.is-normal   { --level: var(--m-ok); }
-.is-warning  { --level: var(--m-warn); }
-.is-critical { --level: var(--m-critical); }
-
-.status-dot {
-    display: inline-block;
-    flex-shrink: 0;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--level, var(--m-muted));
 }
 
 
@@ -46,10 +14,14 @@
    Inhalt
    ========================================= */
 
+.mgmt {
+    --page-width: 1200px;   /* gilt auch für die Titelzeile (page.css) */
+}
+
 .mgmt-main {
-    max-width: 1200px;
+    max-width: var(--page-width);
     margin: 0 auto;
-    padding: 26px 28px 40px;
+    padding: 18px 28px 40px;
 }
 
 .mgmt-error {
@@ -58,69 +30,7 @@
     color: #9b1c1c;
     background: #fdecec;
     border: 1px solid #f3b4b4;
-    border-radius: var(--m-radius);
-}
-
-
-/* =========================================
-   Kennzahlen
-   ========================================= */
-
-.kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 14px;
-    margin-bottom: 26px;
-}
-
-.kpi-card {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 16px 18px;
-    background: var(--m-surface);
-    border: 1px solid var(--m-border);
-    border-radius: var(--m-radius);
-}
-
-.kpi-card.is-status {
-    border-left: 5px solid var(--level);
-}
-
-.kpi-card.is-warning {
-    background: #fffcf2;
-}
-
-.kpi-card.is-critical {
-    background: #fff6f6;
-}
-
-.kpi-label {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    color: var(--m-muted);
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
-
-.kpi-card strong {
-    font-size: 34px;
-    line-height: 1.1;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-}
-
-.kpi-sub {
-    color: var(--m-muted);
-    font-size: 12px;
-}
-
-.kpi-card.is-status .kpi-sub {
-    color: var(--level);
-    font-weight: 600;
+    border-radius: var(--radius-sm);
 }
 
 
@@ -129,7 +39,8 @@
    ========================================= */
 
 .mgmt-main > .mgmt-panel,
-.analytics {
+.analytics,
+.chart-layout {
     margin-bottom: 26px;
 }
 
@@ -138,13 +49,27 @@
    Auswertung
    ========================================= */
 
+/* Bleibt beim Scrollen oben stehen, solange die Auswertung
+   (inkl. Ereignis-Tabellen) sichtbar ist – der Zeitraum ist
+   so immer erkennbar und umschaltbar. */
 .analytics-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 14px;
+    margin: 0 -12px 14px;
+    padding: 10px 12px;
+    background: var(--surface-soft);
+    border-bottom: 1px solid transparent;
+}
+
+.analytics-header.is-stuck {
+    border-bottom-color: var(--border);
+    box-shadow: 0 4px 10px -6px rgba(0, 0, 0, 0.18);
 }
 
 .analytics-header h2 {
@@ -154,24 +79,24 @@
 }
 
 .analytics-header span {
-    color: var(--m-muted);
+    color: var(--text-muted);
     font-size: 12px;
 }
 
 /* Zeitraum-Auswahl: eine Reihe über allem, was sie betrifft */
 .period-filter {
     display: inline-flex;
-    background: var(--m-surface);
-    border: 1px solid var(--m-border);
-    border-radius: var(--m-radius);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
 }
 
 .period-filter button {
     padding: 8px 14px;
     background: transparent;
     border: 0;
-    border-right: 1px solid var(--m-border);
-    color: var(--m-muted);
+    border-right: 1px solid var(--border);
+    color: var(--text-muted);
     font: inherit;
     font-size: 13px;
     cursor: pointer;
@@ -182,18 +107,19 @@
 }
 
 .period-filter button:hover {
-    background: var(--m-soft);
+    background: var(--surface-soft);
 }
 
 .period-filter button[aria-pressed="true"] {
-    background: var(--primary, #1d5fbf);
+    background: var(--primary);
     color: #ffffff;
     font-weight: 600;
 }
 
 /* Beim Nachladen alten Stand gedimmt stehen lassen – kein Springen */
 .analytics.is-loading .chart-layout,
-.analytics.is-loading .kpi-grid {
+.analytics.is-loading .kpi-grid,
+.analytics.is-loading .events-panel {
     opacity: 0.55;
     transition: opacity 0.15s;
 }
@@ -206,6 +132,68 @@
 
 .chart-wide {
     grid-column: 1 / -1;
+}
+
+
+/* =========================================
+   Ereignisse: Ausfälle / Reparaturen als Reiter
+   ========================================= */
+
+.events-tabs {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.events-tabs button {
+    padding: 7px 14px;
+    background: var(--surface);
+    border: 0;
+    border-right: 1px solid var(--border);
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.events-tabs button:last-child {
+    border-right: 0;
+}
+
+.events-tabs button:hover {
+    background: var(--surface-soft);
+}
+
+.events-tabs button[aria-selected="true"] {
+    background: var(--primary);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* .panel-header span färbt sonst grau */
+.panel-header .tab-count {
+    color: inherit;
+    font-size: inherit;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.8;
+}
+
+.repairs-table-wrapper {
+    overflow-x: auto;
+}
+
+.repairs-table-wrapper[hidden] {
+    display: none;
+}
+
+.events-panel table {
+    margin: 0;
+    border: none;
+}
+
+/* globale Spaltenbreiten der Werkzeugtabelle hier nicht anwenden */
+.events-panel th {
+    width: auto;
 }
 
 .chart-body {
@@ -224,9 +212,9 @@
    ========================================= */
 
 .mgmt-panel {
-    background: var(--m-surface);
-    border: 1px solid var(--m-border);
-    border-radius: var(--m-radius);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
 }
 
 .panel-header {
@@ -236,7 +224,7 @@
     justify-content: space-between;
     gap: 12px;
     padding: 18px 20px;
-    border-bottom: 1px solid var(--m-border);
+    border-bottom: 1px solid var(--border);
 }
 
 .panel-header h2 {
@@ -246,7 +234,7 @@
 }
 
 .panel-header span {
-    color: var(--m-muted);
+    color: var(--text-muted);
     font-size: 12px;
 }
 
@@ -269,7 +257,7 @@
     padding: 14px 20px;
     color: inherit;
     text-decoration: none;
-    border-bottom: 1px solid var(--m-border);
+    border-bottom: 1px solid var(--border);
     border-left: 4px solid transparent;
     transition: background 0.15s;
 }
@@ -279,16 +267,16 @@
 }
 
 .location-row:hover {
-    background: var(--m-soft);
+    background: var(--surface-soft);
 }
 
 .location-row.is-critical {
-    border-left-color: var(--m-critical);
+    border-left-color: var(--level-critical);
     background: #fff8f8;
 }
 
 .location-row.is-warning {
-    border-left-color: var(--m-warn);
+    border-left-color: var(--level-warning);
 }
 
 .location-head {
@@ -328,13 +316,13 @@
     display: flex;
     align-items: baseline;
     gap: 16px;
-    color: var(--m-muted);
+    color: var(--text-muted);
     font-size: 13px;
     font-variant-numeric: tabular-nums;
 }
 
 .location-values strong {
-    color: var(--m-text);
+    color: var(--text);
 }
 
 .location-percent {
@@ -345,13 +333,14 @@
     text-align: right;
 }
 
-/* Balken mit Markierungen bei 25 % und 50 % */
+/* Balken mit Strichen bei den Grenzwerten (Position setzt script.js
+   aus STATUS_THRESHOLDS) */
 
 .location-bar {
     position: relative;
     height: 10px;
-    background: var(--m-soft);
-    border: 1px solid var(--m-border);
+    background: var(--surface-soft);
+    border: 1px solid var(--border);
     border-radius: 5px;
 }
 
@@ -367,7 +356,7 @@
     top: -3px;
     bottom: -3px;
     width: 1px;
-    background: var(--m-muted);
+    background: var(--text-muted);
     opacity: 0.6;
 }
 
@@ -375,7 +364,7 @@
     margin: 0;
     padding: 32px;
     text-align: center;
-    color: var(--m-muted);
+    color: var(--text-muted);
 }
 
 
@@ -387,14 +376,6 @@
 
     .mgmt-main {
         padding: 16px;
-    }
-
-    .kpi-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .kpi-card strong {
-        font-size: 28px;
     }
 
     .location-row {

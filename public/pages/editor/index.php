@@ -20,19 +20,7 @@ requirePagePermission('admin.access');
 
 <body class="page">
 
-<header class="page-header">
-    <div class="page-header-left">
-        <a class="button_neutral page-back" href="/">Zurück</a>
-
-        <div class="page-title">
-            <h1>Verwaltung</h1>
-            <span>Stammdaten pflegen</span>
-        </div>
-    </div>
-
-    <!-- wird von script.js je Bereich gesetzt -->
-    <div class="page-meta" id="page_breadcrumb"></div>
-</header>
+<?php include __DIR__ . '/../../components/app_header.php'; ?>
 
 <div class="admin-layout">
 
@@ -103,8 +91,6 @@ requirePagePermission('admin.access');
 
         <div class="admin-content">
 
-            <!-- Seitenüberschrift -->
-
             <div class="section-header">
 
                 <div>
@@ -152,8 +138,6 @@ requirePagePermission('admin.access');
             </div>
 
 
-            <!-- Toolbar -->
-
             <div class="table-toolbar">
 
                 <div class="toolbar-left">
@@ -181,8 +165,6 @@ requirePagePermission('admin.access');
 
             </div>
 
-
-            <!-- Tabelle -->
 
             <table class="admin-table" id="data_table">
 
@@ -283,5 +265,6 @@ requirePagePermission('admin.access');
 <script src="/components/report_dialog.js"></script>
 <script src="/components/document_upload_dialog.js"></script>
 <script src="script.js"></script>
+<script src="/assets/js/app-header.js"></script>
 </body>
 </html>

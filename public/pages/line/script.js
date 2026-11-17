@@ -57,6 +57,7 @@ function buildToolCard(tool) {
     const status = getToolStatus(tool.status_id);
 
     const article = document.createElement("article");
+    // chip_wartung → status-wartung: steuert die Kartenfarbe (styles.css)
     article.className = `line-card ${status.chip.replace("chip_", "status-")}`;
     article.tabIndex = 0;
     article.setAttribute("role", "button");
@@ -99,7 +100,7 @@ function buildToolCard(tool) {
 
     const footer = document.createElement("div");
     footer.className = "line-card-footer";
-    footer.textContent = `Letzte Reinigung: ${formatDate(tool.last_cleaning_at)}`;
+    footer.textContent = `Letzte Reinigung: ${formatCleaningDate(tool.last_cleaning_at)}`;
 
     article.append(head, title, data, footer);
     return article;
@@ -118,8 +119,10 @@ function buildDataField(label, value) {
     return wrapper;
 }
 
-// "2026-11-06 14:30:00" → "06.11.2026"
-function formatDate(value) {
+// "2026-11-06 14:30:00" → "06.11.2026", leer → "–"
+// Eigener Name: alle Skripte teilen sich den globalen Namensraum, ein
+// zweites formatDate() würde das aus report_dialog.js überschreiben.
+function formatCleaningDate(value) {
     if (!value) {
         return "–";
     }
@@ -128,7 +131,7 @@ function formatDate(value) {
     return day && month && year ? `${day}.${month}.${year}` : "–";
 }
 
-// Kopfzeile rechts: "6 Werkzeuge · 1 in Wartung"
+// Titelzeile rechts: "6 Werkzeuge · 1 in Wartung"
 function updateToolCount(tools) {
     const inMaintenance = tools.filter(tool => tool.status_id === TOOL_STATUS_MAINTENANCE).length;
     const parts = [`${tools.length} ${tools.length === 1 ? "Werkzeug" : "Werkzeuge"}`];

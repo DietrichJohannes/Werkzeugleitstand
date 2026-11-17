@@ -1,4 +1,11 @@
-<?php require_once __DIR__ . '/../../src/tool_status.php'; ?>
+<?php require_once __DIR__ . '/../../src/tool_status.php'; // Status-Auswahl unten ?>
+<!-- =========================================
+     Dialog: Werkzeug anzeigen und steuern (Status, Standort,
+     Verlauf, Ersatzteile, Reparatur)
+     Logik: components/tool_info_dialog.js
+     Benötigt zusätzlich report_dialog.php und parts_dialog.php
+     ========================================= -->
+
 <dialog id="tool_info_dialog" class="tool_dialog">
 
     <div class="dialog-header">

@@ -1,3 +1,18 @@
+/* =========================================
+   Basis-Stylesheet – auf JEDER Seite zuerst eingebunden
+   =========================================
+   Enthält: Farb-Variablen, Grundtypografie, Linienkarten,
+   Dialoge, Formulare, Tabellen, Buttons, Status-Chips,
+   globale Kopfzeile, Kennzahl-Karten.
+
+   Weitere Ebenen (in dieser Reihenfolge einbinden):
+     page.css     Seitengerüst (Titelzeile, Panels, Filter)
+     home.css / charts.css / <seite>/styles.css   seitenspezifisch
+
+   Farben nur über die Variablen unten ändern – die Seiten
+   verwenden keine eigenen Farbwerte für Status und Stufen.
+   ========================================= */
+
 :root {
     --bg: #f4f6f8;
     --surface: #ffffff;
@@ -19,6 +34,18 @@
     --danger-hover: #9f2727;
 
     --warning: #b86600;
+
+    /* Werkzeugstatus – EINZIGE Stelle für diese Farben
+       (Chips, Karten, Kennzahlen, Filter). Gegenstück: js/tool-status.js */
+    --status-ready:       var(--primary);
+    --status-active:      var(--success);
+    --status-maintenance: var(--danger);
+    --status-scrapped:    #7a8592;
+
+    /* Standort-Bewertung (js/location-status.js) */
+    --level-normal:   #1a7f37;
+    --level-warning:  #b86600;
+    --level-critical: #c53030;
 
     /* bewusst kantiger */
     --radius-sm: 2px;
@@ -85,57 +112,6 @@ h2 {
 h3 {
     font-size: 16px;
     font-weight: 700;
-}
-
-
-/* =========================================
-   Layout
-   ========================================= */
-
-.layout {
-    display: flex;
-    min-height: 100vh;
-}
-
-.sidebar {
-    width: 240px;
-    min-height: 100vh;
-
-    padding: 20px 14px;
-
-    background-color: var(--surface);
-
-    border-right: 1px solid var(--border);
-}
-
-.sidebar a {
-    display: block;
-
-    padding: 8px 10px;
-
-    color: var(--text);
-    text-decoration: none;
-
-    border: 1px solid transparent;
-    border-radius: var(--radius-sm);
-}
-
-.sidebar a:hover {
-    background-color: var(--surface-soft);
-
-    border-color: var(--border);
-
-    color: var(--primary);
-}
-
-.content {
-    flex: 1;
-
-    width: 100%;
-    max-width: 1600px;
-
-    margin: 0 auto;
-    padding: 28px;
 }
 
 
@@ -287,10 +263,10 @@ h3 {
    Statusfarben der Karten
    ========================================= */
 
-.line-card.status-bereit       { --card-status: var(--primary); }
-.line-card.status-aktiv        { --card-status: var(--success); }
-.line-card.status-wartung      { --card-status: var(--danger); }
-.line-card.status-verschrottet { --card-status: #7a8592; }
+.line-card.status-bereit       { --card-status: var(--status-ready); }
+.line-card.status-aktiv        { --card-status: var(--status-active); }
+.line-card.status-wartung      { --card-status: var(--status-maintenance); }
+.line-card.status-verschrottet { --card-status: var(--status-scrapped); }
 
 .line-card.status-wartung {
     background-color: #fff8f8;
@@ -328,7 +304,7 @@ h3 {
 }
 
 
-/* Wenn <dialog> benutzt wird */
+/* abgedunkelter Hintergrund hinter geöffneten Dialogen (showModal) */
 
 dialog.tool_dialog {
     border: 1px solid #9fa8b2;
@@ -743,6 +719,9 @@ tbody tr:nth-child(even) {
 tbody tr:hover {
     background-color: #f3f6f9;
 }
+/* Spaltenbreiten der Werkzeugtabelle (Übersicht). Gilt global für ALLE
+   Tabellen – andere Tabellen setzen deshalb "th { width: auto }"
+   (z. B. .parts-table, .documents-table, .events-panel). */
 th:nth-child(1) { width: 13%; } /* Name */
 th:nth-child(2) { width: 9%; }  /* Status */
 th:nth-child(3) { width: 10%; } /* Standort */
@@ -750,7 +729,6 @@ th:nth-child(4) { width: 16%; } /* Verbindung */
 th:nth-child(5) { width: 9%; }  /* Lokring */
 th:nth-child(6) { width: 11%; } /* Backendset */
 th:nth-child(7) { width: 12%; } /* Grundkörper */
-th:nth-child(8) { width: 12%; } /* Aktionen */
 
 
 /* =========================================
@@ -918,6 +896,12 @@ th:nth-child(8) { width: 12%; } /* Aktionen */
     text-transform: uppercase;
 }
 
+.chip_bereit       { color: var(--status-ready); }
+.chip_aktiv        { color: var(--status-active); }
+.chip_wartung      { color: var(--status-maintenance); }
+.chip_verschrottet { color: var(--status-scrapped); }
+.chip_neutral      { color: var(--text-muted); }
+
 #search {
     width: 400px;
     padding: 8px;
@@ -931,10 +915,6 @@ th:nth-child(8) { width: 12%; } /* Aktionen */
 
 @media (max-width: 650px) {
 
-    .content {
-        padding: 18px 14px;
-    }
-
     .tool_dialog {
         padding: 18px;
     }
@@ -947,5 +927,335 @@ th:nth-child(8) { width: 12%; } /* Aktionen */
 
     .dialog-actions {
         grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================
+   Globale Kopfzeile mit Navigation
+   Markup: /components/app_header.php
+   Verhalten: /assets/js/app-header.js
+   Schlicht wie der Rest: weiß, 1px-Linie, aktive
+   Markierung wie in der Verwaltungs-Seitenleiste.
+   ========================================= */
+
+.app-header {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    padding: 10px 28px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.app-brand {
+    flex-shrink: 0;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.app-brand strong {
+    display: block;
+    font-size: 16px;
+}
+
+.app-brand span {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* ---------- Menüpunkte ---------- */
+
+.app-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.app-nav > a,
+.app-nav-menu > summary {
+    display: block;
+    padding: 7px 12px;
+    color: var(--text);
+    text-decoration: none;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.app-nav > a:hover,
+.app-nav-menu > summary:hover,
+.app-nav-menu[open] > summary {
+    background: var(--surface-soft);
+    border-color: var(--border);
+}
+
+.app-nav > a[aria-current="page"],
+.app-nav-menu.is-current > summary {
+    background: #edf4ff;
+    color: var(--primary);
+    border-color: #abc4ea;
+}
+
+/* Verwaltung abgesetzt am rechten Rand des Menüs */
+.app-nav > .app-nav-admin {
+    margin-left: auto;
+}
+
+/* ---------- Untermenü "Anleitungen" ---------- */
+
+.app-nav-menu {
+    position: relative;
+}
+
+.app-nav-menu > summary {
+    list-style: none;
+}
+
+.app-nav-menu > summary::-webkit-details-marker {
+    display: none;
+}
+
+.app-nav-menu > summary::after {
+    content: " ▾";
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.app-nav-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 50;
+    min-width: 220px;
+    padding: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.app-nav-dropdown a {
+    display: block;
+    padding: 7px 10px;
+    color: var(--text);
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+}
+
+.app-nav-dropdown a:hover {
+    background: var(--surface-soft);
+    border-color: var(--border);
+}
+
+.app-nav-dropdown a[aria-current="page"] {
+    color: var(--primary);
+}
+
+/* ---------- Angemeldeter Benutzer ---------- */
+
+.app-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    min-width: 0;
+    padding-left: 20px;
+    border-left: 1px solid var(--border);
+}
+
+.app-user-text {
+    min-width: 0;
+    text-align: right;
+    line-height: 1.25;
+}
+
+.app-user-text strong {
+    display: block;
+    max-width: 200px;
+    overflow: hidden;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-user-text span {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.app-avatar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--primary);
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    user-select: none;
+}
+
+.app-user[hidden],
+.app-nav [hidden] {
+    display: none !important;
+}
+
+/* ---------- Schmal ---------- */
+
+@media (max-width: 900px) {
+    .app-header {
+        flex-wrap: wrap;
+        gap: 10px 16px;
+        padding: 10px 16px;
+    }
+
+    .app-user {
+        margin-left: auto;
+        padding-left: 0;
+        border-left: none;
+    }
+
+    /* schmal: nur Initialen, Name steht im Tooltip */
+    .app-user-text {
+        display: none;
+    }
+
+    /* Menü als eigene, waagerecht wischbare Zeile */
+    .app-nav {
+        order: 3;
+        flex-basis: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .app-nav > a,
+    .app-nav-menu > summary {
+        border-color: var(--border);
+    }
+
+    .app-nav > .app-nav-admin {
+        margin-left: 0;
+    }
+
+    /* scrollende Leiste würde das Untermenü abschneiden */
+    .app-nav-dropdown {
+        position: fixed;
+        top: auto;
+        left: 16px;
+        right: 16px;
+    }
+}
+
+
+/* =========================================
+   Bewertungsstufen (normal / warning / critical)
+   aus js/location-status.js – setzt --level
+   ========================================= */
+
+.is-normal   { --level: var(--level-normal); }
+.is-warning  { --level: var(--level-warning); }
+.is-critical { --level: var(--level-critical); }
+
+.status-dot {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--level, var(--text-muted));
+}
+
+
+/* =========================================
+   Kennzahl-Karten (Startseite + Management)
+
+   <div class="kpi-grid">
+     <div class="kpi-card kpi-ready">            ← farbiger Balken nach Status
+       <span class="kpi-label">Bereit</span>
+       <strong>12</strong>
+       <span class="kpi-sub">40 % vom Bestand</span>   (optional)
+     </div>
+     <div class="kpi-card is-status is-warning">  ← Farbe nach Bewertung
+   ========================================= */
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+    margin-bottom: 26px;
+}
+
+.kpi-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--kpi-accent, var(--border));
+    border-radius: var(--radius-sm);
+}
+
+.kpi-total       { --kpi-accent: var(--text-muted); }
+.kpi-ready       { --kpi-accent: var(--status-ready); }
+.kpi-active      { --kpi-accent: var(--status-active); }
+.kpi-maintenance { --kpi-accent: var(--status-maintenance); }
+
+.kpi-card.is-status {
+    --kpi-accent: var(--level);
+}
+
+.kpi-card.is-warning  { background: #fffcf2; }
+.kpi-card.is-critical { background: #fff6f6; }
+
+.kpi-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.kpi-card strong {
+    font-size: 30px;
+    line-height: 1.15;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.kpi-sub {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.kpi-card.is-status .kpi-sub {
+    color: var(--level);
+    font-weight: 600;
+}
+
+@media (max-width: 750px) {
+    .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .kpi-card strong {
+        font-size: 26px;
     }
 }

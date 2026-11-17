@@ -3,6 +3,8 @@
 // =========================================
 // Gegenstück zu src/tool_status.php und zur DB-Tabelle tool_statuses –
 // bei Änderungen ALLE DREI anpassen.
+// Farben: --status-* in styles.css; die chip_*-Klassen steuern Chips
+// und (als status-*) die Linienkarten.
 
 const TOOL_STATUS_READY       = 1;
 const TOOL_STATUS_ACTIVE      = 2;

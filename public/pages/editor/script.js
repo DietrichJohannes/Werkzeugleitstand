@@ -23,12 +23,32 @@ const lookups = {
 // =========================================
 // Sektions-Konfiguration
 // =========================================
+// Neue Sektion: Eintrag hier + Link mit data-section="<schlüssel>" in
+// index.php. Aufbau eines Eintrags:
+//
+//   title, description   Überschrift + Text über der Tabelle
+//   createLabel          Text des "Anlegen"-Knopfs
+//   entityName           Bezeichnung in Meldungen ("Werkzeug wurde gelöscht")
+//   endpoint, listKey    API-Datei und Schlüssel der Liste in deren GET-Antwort
+//   showStats            Kennzahl-Kacheln über der Tabelle anzeigen
+//
+//   columns: [{ label, value, render?, strong?, className? }]
+//     value(item)  → Text für Tabelle, Suche und CSV-Export
+//     render(item) → optional eigenes Element statt Text (z. B. Status-Chip)
+//
+//   fields: [{ key, label, type: 'text' | 'number' | 'select', ... }]
+//     key          JSON-Feld der API
+//     required, maxLength, min, max, step, placeholder   wie bei <input>
+//     lookup       Name in `lookups` (Auswahl wird aus der API geladen)
+//     options      feste Auswahl [{ value, label }] statt lookup
+//     valueType    'string': Auswahlwert nicht in eine Zahl umwandeln
+//     editOnly     nur beim Bearbeiten anzeigen, nicht beim Anlegen
+//     action       { label, onClick } – Zusatzknopf neben dem Feld
 
 const sections = {
 
     tools: {
         title: 'Werkzeuge',
-        breadcrumb: 'Übersicht Werkzeuge',
         description: 'Werkzeugstammdaten verwalten.',
         createLabel: '+ Werkzeug anlegen',
         entityName: 'Werkzeug',
@@ -56,7 +76,6 @@ const sections = {
 
     bauteile: {
         title: 'Bauteile',
-        breadcrumb: 'Übersicht HiBe Materialien',
         description: 'Bauteilstammdaten verwalten.',
         createLabel: '+ Bauteil anlegen',
         entityName: 'Bauteil',
@@ -79,7 +98,6 @@ const sections = {
 
     standorte: {
         title: 'Standorte',
-        breadcrumb: 'Übersicht Standorte',
         description: 'Standorte verwalten.',
         createLabel: '+ Standort anlegen',
         entityName: 'Standort',
@@ -98,7 +116,6 @@ const sections = {
 
     koerper: {
         title: 'Grundkörper',
-        breadcrumb: 'Übersicht Grundkörper',
         description: 'Grundkörper verwalten.',
         createLabel: '+ Grundkörper anlegen',
         entityName: 'Grundkörper',
@@ -118,7 +135,6 @@ const sections = {
 
     backensets: {
         title: 'Backensets',
-        breadcrumb: 'Übersicht Backensets',
         description: 'Backensets verwalten.',
         createLabel: '+ Backenset anlegen',
         entityName: 'Backenset',
@@ -138,7 +154,6 @@ const sections = {
 
     verbindungen: {
         title: 'Verbindungen',
-        breadcrumb: 'Übersicht Verbindungen',
         description: 'Verbindungen verwalten.',
         createLabel: '+ Verbindung anlegen',
         entityName: 'Verbindung',
@@ -157,7 +172,6 @@ const sections = {
 
     ausfallursachen: {
         title: 'Ausfallursachen',
-        breadcrumb: 'Übersicht Ausfallursachen',
         description: 'Auswahlliste für „Ausfall melden“. Benutzte Ursachen lassen sich nicht löschen, nur deaktivieren.',
         createLabel: '+ Ursache anlegen',
         entityName: 'Ausfallursache',
@@ -274,7 +288,6 @@ function switchSection(sectionKey) {
         link.classList.toggle('active', link.dataset.section === sectionKey);
     });
 
-    setText('page_breadcrumb', config.breadcrumb);
     setText('page_title', config.title);
     setText('page_description', config.description);
     setText('create_button', config.createLabel);

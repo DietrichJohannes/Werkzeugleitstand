@@ -1,12 +1,12 @@
 /* =========================================
-   Seitengerüst für einfache Unterseiten
-   (Übersicht, Dokumente, …)
-   Gleiches Schema wie die Management-Ansicht:
-   weiße Kopfzeile, grauer Hintergrund, Panels.
+   Seitengerüst für alle Seiten
+   Grauer Hintergrund, Titelzeile über dem Inhalt,
+   weiße Panels mit 1px-Rahmen.
 
    Aufbau:
      <body class="page">
-       <header class="page-header">…</header>
+       <?php include …/components/app_header.php ?>   (Menü)
+       <header class="page-header">…</header>        (Titelzeile, ohne eigenen Balken)
        <main class="page-main">
          <section class="page-panel">
            <div class="panel-toolbar">…</div>
@@ -27,22 +27,29 @@
 }
 
 
-/* ---------- Kopfzeile ---------- */
+/* ---------- Titelzeile ----------
+   Kein eigener Balken: die einzige Leiste oben ist das Menü
+   (app_header.php). Der Titel steht bündig über dem Inhalt,
+   gleiche Breite wie .page-main (--page-width). */
+
+.page {
+    --page-width: 1400px;
+}
 
 .page-header {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
     gap: 16px;
-    padding: 12px 28px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 24px 28px 0;
 }
 
 .page-header-left {
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 16px;
     min-width: 0;
 }
 
@@ -75,9 +82,9 @@
 /* ---------- Inhalt ---------- */
 
 .page-main {
-    max-width: 1400px;
+    max-width: var(--page-width);
     margin: 0 auto;
-    padding: 26px 28px 40px;
+    padding: 18px 28px 40px;
 }
 
 .page-panel {
@@ -169,7 +176,7 @@
 @media (max-width: 750px) {
     .page-header {
         flex-wrap: wrap;
-        padding: 12px 16px;
+        padding: 16px 16px 0;
     }
 
     .page-meta {
@@ -193,15 +200,6 @@
 }
 
 
-/* ---------- Status-Chips (Farben wie in den Linienkarten) ---------- */
-
-.page .chip_bereit       { color: var(--primary); }
-.page .chip_aktiv        { color: var(--success); }
-.page .chip_wartung      { color: var(--danger); }
-.page .chip_verschrottet { color: #7a8592; }
-.page .chip_neutral      { color: var(--text-muted); }
-
-
 /* ---------- Kompakter Button in Tabellenzeilen ---------- */
 
 .page .button-small {
@@ -209,4 +207,90 @@
     padding: 4px 10px;
     font-size: 12px;
     white-space: nowrap;
+}
+
+
+/* ---------- Statusfilter (Übersicht) ---------- */
+
+.panel-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+}
+
+.status-filter {
+    display: inline-flex;
+    flex-wrap: wrap;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.status-filter button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: transparent;
+    border: 0;
+    border-right: 1px solid var(--border);
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.status-filter button:last-child {
+    border-right: 0;
+}
+
+.status-filter button:hover {
+    background: var(--surface-soft);
+}
+
+/* Farbpunkt je Status */
+.status-filter button[data-status]::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--filter-color, var(--text-muted));
+}
+
+.status-filter button[data-status="1"] { --filter-color: var(--status-ready); }
+.status-filter button[data-status="2"] { --filter-color: var(--status-active); }
+.status-filter button[data-status="3"] { --filter-color: var(--status-maintenance); }
+.status-filter button[data-status="4"] { --filter-color: var(--status-scrapped); }
+
+.status-filter button[aria-pressed="true"] {
+    background: var(--primary);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.status-filter button[aria-pressed="true"]::before {
+    background: #ffffff;
+}
+
+/* .panel-toolbar span färbt sonst grau */
+.panel-toolbar .status-filter-count {
+    color: inherit;
+    font-size: inherit;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.8;
+}
+
+
+/* ---------- Klickbare Tabellenzeilen ---------- */
+
+.row-clickable {
+    cursor: pointer;
+}
+
+.row-clickable:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
 }

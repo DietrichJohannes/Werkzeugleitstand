@@ -14,8 +14,9 @@ require_once __DIR__ . '/../../src/api_bootstrap.php';
  *  DELETE /api/locations.php?id=1     löschen   (Einrichter, nur wenn keine Werkzeuge dort sind)
  *
  *  Felder: name (Pflicht),
- *          min_stock (optional, Mindestbestand: ab dieser Anzahl Werkzeuge
- *                         oder weniger gilt der Standort als kritisch)
+ *          min_stock (optional, Mindestbestand: hat der Standort weniger
+ *                     Werkzeuge, gilt er als kritisch – siehe
+ *                     assets/js/location-status.js)
  */
 
 function validateMinimumStock(mixed $value): ?int

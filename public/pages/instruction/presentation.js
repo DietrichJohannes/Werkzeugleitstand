@@ -1,3 +1,10 @@
+// =========================================
+// Folien-Präsentation der Anleitungen
+// =========================================
+// Folien: pages/instruction/<anleitung>/slides/*.html, von index.php in
+// Dateinamen-Reihenfolge als <section class="slide"> eingebunden.
+// Blättern per Knopf, Pfeiltasten, Bild↑/↓ und Leertaste.
+
 const slides = document.querySelectorAll('.slide');
 const counter = document.getElementById('counter');
 

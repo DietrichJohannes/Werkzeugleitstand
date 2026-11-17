@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 /*
  * ============================================================
- * API INFORMATION
+ *  Versionsangaben der API
  * ============================================================
+ *  API_VERSION und API_LAST_MODIFIED bei jedem Release anheben
+ *  (Skill /release) – die Commit-Message ist dann nur die Version.
  */
 
 const API_NAME              = 'BSH Werkzeugleitstand';
@@ -13,12 +15,7 @@ const API_AUTHOR            = 'Johannes Dietrich';
 const API_LAST_MODIFIED     = '06.11.2026';
 const API_DESCRIPTION       = 'REST-API zur Verwaltung von Werkzeugen, Reparaturen und Ersatzteilen.';
 
-/*
- * ============================================================
- * API CONFIGURATION
- * ============================================================
- */
-
+// Alle Zeitstempel (date(), NOW()-Vergleiche) in deutscher Zeit.
 // Umgebung (development/production) und Zugangsdaten: config/config.php
 const API_TIMEZONE          = 'Europe/Berlin';
 
@@ -43,12 +40,13 @@ require_once __DIR__ . '/database.php'; // stellt db() und config() bereit
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/tool_status.php';
 require_once __DIR__ . '/tool_events.php';
-
-// ---------- Session ----------
-
 require_once __DIR__ . '/session.php';
 
 // ---------- Zentrale Fehlerbehandlung ----------
+// Endpunkte fangen Datenbankfehler nicht selbst ab: Verletzte
+// DB-Regeln (doppelter Name, Fremdschlüssel …) werden hier in
+// verständliche 4xx-Meldungen übersetzt, alles andere wird
+// geloggt und als 500 ohne Details beantwortet.
 
 set_exception_handler(function (Throwable $e) {
     // SQLSTATE 23xxx = eine Datenbankregel wurde verletzt.
@@ -69,6 +67,8 @@ set_exception_handler(function (Throwable $e) {
 });
 
 // ---------- Antworten ----------
+// Jede Antwort hat die Form { success, message?, ...daten }.
+// Beide Funktionen beenden das Skript.
 
 function sendJson(array $payload, int $statusCode = 200): never
 {
@@ -83,6 +83,8 @@ function sendError(int $statusCode, string $message): never
 }
 
 // ---------- Eingaben ----------
+// Validierungs-Helfer: liefern den bereinigten Wert oder beenden
+// den Request mit 400 und einer Meldung für den Benutzer.
 
 function readJsonBody(): array
 {

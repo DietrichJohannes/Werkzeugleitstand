@@ -20,7 +20,7 @@ const ROLE_BEOBACHTER = 'beobachter';
 const ROLE_USER       = 'user';
 const ROLE_EINRICHTER = 'einrichter';
 
-// Anzeigenamen der Rollen (z. B. im Kopf der Startseite)
+// Anzeigenamen der Rollen (Kopfzeile, geliefert von api/me.php)
 const ROLE_LABELS = [
     ROLE_BEOBACHTER => 'Beobachter',
     ROLE_USER       => 'Benutzer',
@@ -28,7 +28,10 @@ const ROLE_LABELS = [
 ];
 
 /*
- * Rechteverwaltung pro API
+ * Recht => Rollen, die es haben.
+ * Neues Recht: hier eintragen, im Endpoint per handleRequest() bzw.
+ * requirePermission() prüfen und im Frontend ggf. per
+ * data-permission="..." ausblenden.
  */
 const PERMISSIONS = [
     // Werkzeuge
@@ -81,9 +84,9 @@ const PERMISSIONS = [
     'connections.read'      => [ROLE_BEOBACHTER, ROLE_USER, ROLE_EINRICHTER],
     'connections.write'     => [ROLE_EINRICHTER],
 
-    // Einrichter Panel
-    'admin.access'          => [ROLE_EINRICHTER],
-    'documents.access'      => [ROLE_USER, ROLE_EINRICHTER],
+    // Seiten und Menüpunkte (requirePagePermission() / data-permission)
+    'admin.access'          => [ROLE_EINRICHTER],               // Verwaltung
+    'documents.access'      => [ROLE_USER, ROLE_EINRICHTER],    // Dokumente + Anleitungen
 
     // Übersicht / Statistik (nur lesen, aber nur für angemeldete Nutzer)
     'dashboard.read'        => [ROLE_BEOBACHTER, ROLE_USER, ROLE_EINRICHTER],
@@ -91,7 +94,7 @@ const PERMISSIONS = [
 
 /*
  * ============================================================
- *  NUR ZUM TESTEN – solange es noch keine User-Datenbank gibt
+ *  NUR ZUM LOKALEN TESTEN ohne Kerberos/AD
  * ============================================================
  *  Ist in config/config.php 'auth.dev_fake_role' gesetzt, gilt
  *  JEDER Aufruf als angemeldet mit dieser Rolle.
@@ -103,8 +106,8 @@ function devFakeRole(): ?string
 {
     $role = config('auth.dev_fake_role');
 
-    // Nur mit dem PHP-Testserver (php -S). Unter Apache greift die
-    // Test-Rolle nie – auch nicht bei versehentlich falscher Config.
+    // PHP_SAPI-Prüfung: schützt auch bei versehentlich auf dem
+    // Server gesetzter Test-Rolle
     if ($role === null || !isDevelopment() || PHP_SAPI !== 'cli-server') {
         return null;
     }
@@ -138,7 +141,7 @@ function currentUser(): ?array
 
 /*
  * ID des angemeldeten Benutzers für created_by-Spalten.
- * null, solange es keine echten Benutzer gibt (Test-Login hat id 0).
+ * null beim Test-Login (id 0 – dazu gibt es keinen Eintrag in `users`).
  */
 function currentUserId(): ?int
 {
@@ -146,6 +149,7 @@ function currentUserId(): ?int
     return $id > 0 ? $id : null;
 }
 
+// Unbekannte Rechtenamen ergeben false (kein Tippfehler-Zugriff).
 function can(string $permission): bool
 {
     $user = currentUser();

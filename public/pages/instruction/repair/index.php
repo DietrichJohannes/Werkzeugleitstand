@@ -7,12 +7,14 @@ sort($slideFiles);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wartung – Anleitung</title>
+    <title>Werkzeug warten – Anleitung</title>
     <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/page.css">
     <link rel="stylesheet" type="text/css" href="../styles.css">
 </head>
 <body class="page">
+
+<?php include __DIR__ . '/../../../components/app_header.php'; ?>
 
 <header class="page-header">
     <div class="page-header-left">
@@ -20,7 +22,7 @@ sort($slideFiles);
         <button type="button" id="back" class="button_neutral page-back">Zurück</button>
 
         <div class="page-title">
-            <h1>Wartung</h1>
+            <h1>Werkzeug warten</h1>
             <span>Anleitung – Werkzeug warten</span>
         </div>
     </div>
@@ -57,5 +59,6 @@ sort($slideFiles);
 </script>
 <script src="../presentation.js"></script>
 
+<script src="/assets/js/app-header.js"></script>
 </body>
 </html>

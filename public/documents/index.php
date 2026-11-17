@@ -47,13 +47,13 @@ if (isset($_GET['file'])) {
 </head>
 <body class="page">
 
+<?php include __DIR__ . '/../components/app_header.php'; ?>
+
     <header class="page-header">
         <div class="page-header-left">
-            <a class="button_neutral page-back" href="/">Zurück</a>
-
             <div class="page-title">
                 <h1>Dokumente</h1>
-                <span>Stücklisten (BoM) zu den Werkzeugen</span>
+                <span>Stücklisten zu den Werkzeugen</span>
             </div>
         </div>
 
@@ -98,5 +98,6 @@ if (isset($_GET['file'])) {
 
     <script src="/assets/js/api.js"></script>
     <script src="/documents/script.js"></script>
+<script src="/assets/js/app-header.js"></script>
 </body>
 </html>

@@ -99,6 +99,8 @@ function handleCreate(): void
     $values = validateFields(readJsonBody(), failureFields(), false);
 
     requireExists('tools', $values['tool_id'], 'Werkzeug nicht gefunden');
+    // Der Ausfall setzt das Werkzeug auf "Wartung" – bei einem verschrotteten
+    // wäre das ein Zurückholen, das nur Einrichter dürfen.
     requireScrapPermissionForChange($values['tool_id'], TOOL_STATUS_MAINTENANCE);
     requireActiveCause($values['cause_id']);
     if ($values['part_id'] !== null) {

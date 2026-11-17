@@ -1,75 +1,32 @@
 // =========================================
-// Übersicht: alle Werkzeuge mit Suche
+// Übersicht: alle Werkzeuge mit Statusfilter und Suche
 // =========================================
 // Benötigt: /assets/js/api.js, /assets/js/tool-status.js,
 //           /components/tool_info_dialog.js
+
+const TABLE_COLUMNS = 7;
+
+const tableBody = document.getElementById('toolTableBody');
+const searchInput = document.getElementById('search');
+const statusFilter = document.getElementById('status_filter');
+
+let selectedStatus = null;   // null = alle Status
 
 // Wird auch vom Werkzeug-Dialog nach dem Speichern aufgerufen.
 async function loadTools() {
     try {
         const data = await apiRequest('tools.php');
 
-        const tableBody = document.getElementById('toolTableBody');
-        tableBody.innerHTML = '';
-
         if (data.tools.length === 0) {
             showToolMessage('Noch keine Werkzeuge angelegt.');
+            updateStatusCounts([]);
             updateToolCount(0, 0);
             return;
         }
 
-        data.tools.forEach(tool => {
-            const row = document.createElement('tr');
-
-            const nameCell = document.createElement('td');
-            const nameText = document.createElement('strong');
-            nameText.textContent = tool.name.trim();
-            nameCell.appendChild(nameText);
-
-            const statusCell = document.createElement('td');
-            statusCell.appendChild(buildStatusChip(tool.status_id));
-
-            row.append(nameCell, statusCell);
-
-            const values = [
-                tool.location,
-                tool.connection,
-                tool.lokring,
-                tool.jaw_set_name,
-                tool.body
-            ];
-
-            values.forEach(value => {
-                const cell = document.createElement('td');
-
-                cell.textContent = typeof value === 'string'
-                    ? value.trim()
-                    : value ?? '';
-
-                row.appendChild(cell);
-            });
-
-            const actionCell = document.createElement('td');
-
-            const editButton = document.createElement('button');
-            editButton.classList.add('button_neutral', 'button-small');
-            editButton.textContent = 'Werkzeug steuern';
-
-            editButton.addEventListener('click', () => {
-                openToolDialog(
-                    tool.id,
-                    tool.status_id,
-                    tool.location_id
-                );
-            });
-
-            actionCell.appendChild(editButton);
-            row.appendChild(actionCell);
-
-            tableBody.appendChild(row);
-        });
-
-        applySearch(); // Filter nach dem Neuladen wieder anwenden
+        tableBody.replaceChildren(...data.tools.map(buildToolRow));
+        updateStatusCounts(data.tools);
+        applyFilters(); // Filter nach dem Neuladen wieder anwenden
 
     } catch (error) {
         console.error('Fehler beim Laden der Werkzeuge:', error);
@@ -78,15 +35,61 @@ async function loadTools() {
     }
 }
 
+/*
+ * Ganze Zeile ist klickbar (Maus) bzw. per Tab + Enter erreichbar.
+ */
+function buildToolRow(tool) {
+    const row = document.createElement('tr');
+    row.className = 'row-clickable';
+    row.dataset.status = String(tool.status_id);
+    row.tabIndex = 0;
+    row.title = 'Werkzeug steuern';
+    row.setAttribute('aria-label', `Werkzeug ${tool.name.trim()} steuern`);
+
+    const nameCell = document.createElement('td');
+    const nameText = document.createElement('strong');
+    nameText.textContent = tool.name.trim();
+    nameCell.appendChild(nameText);
+
+    const statusCell = document.createElement('td');
+    statusCell.appendChild(buildStatusChip(tool.status_id));
+
+    row.append(nameCell, statusCell);
+
+    [
+        tool.location,
+        tool.connection,
+        tool.lokring,
+        tool.jaw_set_name,
+        tool.body
+    ].forEach(value => {
+        const cell = document.createElement('td');
+        cell.textContent = typeof value === 'string' ? value.trim() : value ?? '';
+        row.appendChild(cell);
+    });
+
+    const open = () => openToolDialog(tool.id, tool.status_id, tool.location_id);
+
+    row.addEventListener('click', open);
+    row.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            open();
+        }
+    });
+
+    return row;
+}
+
 function showToolMessage(text) {
     const cell = document.createElement('td');
-    cell.colSpan = 8;
+    cell.colSpan = TABLE_COLUMNS;
     cell.className = 'panel-empty';
     cell.textContent = text;
 
     const row = document.createElement('tr');
     row.appendChild(cell);
-    document.getElementById('toolTableBody').replaceChildren(row);
+    tableBody.replaceChildren(row);
 }
 
 function updateToolCount(visible, total) {
@@ -97,12 +100,61 @@ function updateToolCount(visible, total) {
 
 
 // -------------------------
-// Suchfunktion
+// Statusfilter
 // -------------------------
 
-const searchInput = document.getElementById('search');
+// Knöpfe "Alle" + je Status aus TOOL_STATUS (tool-status.js)
+function buildStatusFilter() {
+    const options = [{ value: null, label: 'Alle' }, ...TOOL_STATUS_OPTIONS];
 
-function applySearch() {
+    statusFilter.replaceChildren(...options.map(option => {
+        const button = document.createElement('button');
+        button.type = 'button';
+
+        if (option.value !== null) {
+            button.dataset.status = String(option.value);
+        }
+
+        const count = document.createElement('span');
+        count.className = 'status-filter-count';
+
+        button.append(option.label, ' ', count);
+
+        button.addEventListener('click', () => {
+            selectedStatus = option.value;
+            markSelectedStatus();
+            applyFilters();
+        });
+
+        return button;
+    }));
+
+    markSelectedStatus();
+}
+
+function markSelectedStatus() {
+    statusFilter.querySelectorAll('button').forEach(button => {
+        const value = button.dataset.status ? Number(button.dataset.status) : null;
+        button.setAttribute('aria-pressed', String(value === selectedStatus));
+    });
+}
+
+function updateStatusCounts(tools) {
+    statusFilter.querySelectorAll('button').forEach(button => {
+        const count = button.dataset.status
+            ? tools.filter(tool => Number(tool.status_id) === Number(button.dataset.status)).length
+            : tools.length;
+
+        button.querySelector('.status-filter-count').textContent = count;
+    });
+}
+
+
+// -------------------------
+// Filter anwenden (Status + Suche)
+// -------------------------
+
+function applyFilters() {
     const searchTerms = searchInput.value
         .toLowerCase()
         .trim()
@@ -110,16 +162,18 @@ function applySearch() {
         .filter(term => term.length > 0);
 
     // Meldungszeilen (Lädt…, Fehler) nicht filtern
-    const rows = document.querySelectorAll('#toolTableBody tr:not(:has(.panel-empty))');
+    const rows = tableBody.querySelectorAll('tr:not(:has(.panel-empty))');
     let visible = 0;
 
     rows.forEach(row => {
         const rowText = row.textContent.toLowerCase();
 
-        const matches = searchTerms.every(term =>
-            rowText.includes(term)
-        );
+        const matchesStatus = selectedStatus === null
+            || Number(row.dataset.status) === selectedStatus;
 
+        const matchesSearch = searchTerms.every(term => rowText.includes(term));
+
+        const matches = matchesStatus && matchesSearch;
         row.style.display = matches ? '' : 'none';
         if (matches) visible++;
     });
@@ -129,7 +183,7 @@ function applySearch() {
     }
 }
 
-searchInput.addEventListener('input', applySearch);
+searchInput.addEventListener('input', applyFilters);
 
-
+buildStatusFilter();
 document.addEventListener('DOMContentLoaded', loadTools);

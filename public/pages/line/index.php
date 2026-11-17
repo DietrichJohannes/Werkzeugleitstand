@@ -9,9 +9,11 @@
 </head>
 <body class="page">
 
+<?php include __DIR__ . '/../../components/app_header.php'; ?>
+
     <header class="page-header">
         <div class="page-header-left">
-            <a class="button_neutral page-back" href="/">Zurück</a>
+            <a class="button_neutral page-back" href="/">← Standorte</a>
 
             <div class="page-title">
                 <!-- Name wird von script.js über /api/locations.php geladen -->
@@ -39,5 +41,6 @@
     <script src="/components/parts_dialog.js"></script>
     <script src="/components/tool_info_dialog.js"></script>
     <script src="script.js"></script>
+<script src="/assets/js/app-header.js"></script>
 </body>
 </html>

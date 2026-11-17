@@ -14,10 +14,10 @@
 
 <body class="page mgmt">
 
+<?php include __DIR__ . '/../../components/app_header.php'; ?>
+
     <header class="page-header">
         <div class="page-header-left">
-            <a class="button_neutral page-back" href="/">Zurück</a>
-
             <div class="page-title">
                 <h1>Management-Ansicht</h1>
                 <span>Lokringwerkzeuge – aktueller Status</span>
@@ -32,21 +32,21 @@
         <!-- Fehlerhinweis, falls die API nicht erreichbar ist -->
         <p class="mgmt-error hidden" id="error_box"></p>
 
-        <!-- Kennzahlen -->
+        <!-- Kennzahlen (aktueller Stand) -->
         <section class="kpi-grid">
 
-            <div class="kpi-card">
+            <div class="kpi-card kpi-total">
                 <span class="kpi-label">Werkzeuge gesamt</span>
                 <strong id="tools_all">–</strong>
             </div>
 
-            <div class="kpi-card">
+            <div class="kpi-card kpi-active">
                 <span class="kpi-label">Aktiv</span>
                 <strong id="tools_active">–</strong>
                 <span class="kpi-sub" id="tools_active_percent"></span>
             </div>
 
-            <div class="kpi-card">
+            <div class="kpi-card kpi-ready">
                 <span class="kpi-label">Bereit</span>
                 <strong id="tools_ready">–</strong>
                 <span class="kpi-sub" id="tools_ready_percent"></span>
@@ -89,7 +89,9 @@
         </section>
 
         <!-- =========================================
-             Auswertung – alles hierunter gilt für den gewählten Zeitraum
+             Auswertung – ALLES in dieser Section gilt für den
+             gewählten Zeitraum. Die Kopfzeile mit der Zeitraum-
+             Auswahl bleibt beim Scrollen bis zum Ende sichtbar.
              ========================================= -->
         <section class="analytics" id="analytics" aria-labelledby="analytics_title">
 
@@ -186,70 +188,67 @@
 
             </div>
 
-        </section>
+            <!-- Ereignisse: Ausfälle / Reparaturen als Reiter -->
+            <section class="mgmt-panel events-panel">
 
-        <!-- Ausfallübersicht -->
-        <section class="mgmt-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Ereignisse</h2>
+                        <span>Erfasste Ausfälle und Reparaturen im gewählten Zeitraum</span>
+                    </div>
 
-            <div class="panel-header">
-                <div>
-                    <h2>Ausfallübersicht</h2>
-                    <span>Erfasste Ausfälle im gewählten Zeitraum</span>
+                    <div class="events-tabs" role="tablist" aria-label="Ereignisart">
+                        <button type="button" role="tab" id="tab_failures" aria-controls="panel_failures" aria-selected="true">
+                            Ausfälle <span class="tab-count" id="failures_count"></span>
+                        </button>
+                        <button type="button" role="tab" id="tab_repairs" aria-controls="panel_repairs" aria-selected="false" tabindex="-1">
+                            Reparaturen <span class="tab-count" id="repairs_count"></span>
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="repairs-table-wrapper">
-                <table class="repairs-table">
-                    <thead>
-                        <tr>
-                            <th>Datum</th>
-                            <th>Werkzeug</th>
-                            <th>Ursache</th>
-                            <th>Bauteil</th>
-                            <th>Bemerkung</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
+                <div class="repairs-table-wrapper" role="tabpanel" id="panel_failures" aria-labelledby="tab_failures">
+                    <table class="repairs-table">
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Werkzeug</th>
+                                <th>Ursache</th>
+                                <th>Bauteil</th>
+                                <th>Bemerkung</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
 
-                    <tbody id="failures_table_body">
-                        <tr>
-                            <td colspan="6">Lädt…</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-        </section>
-
-        <!-- Reparaturübersicht -->
-        <section class="mgmt-panel">
-
-            <div class="panel-header">
-                <div>
-                    <h2>Reparaturübersicht</h2>
-                    <span>Erfasste Reparaturen im gewählten Zeitraum</span>
+                        <tbody id="failures_table_body">
+                            <tr>
+                                <td colspan="6">Lädt…</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
 
-            <div class="repairs-table-wrapper">
-                <table class="repairs-table">
-                    <thead>
-                        <tr>
-                            <th>Datum</th>
-                            <th>Werkzeug</th>
-                            <th>Zu Ausfall</th>
-                            <th>Getauschte Bauteile</th>
-                            <th>Bemerkung</th>
-                        </tr>
-                    </thead>
+                <div class="repairs-table-wrapper" role="tabpanel" id="panel_repairs" aria-labelledby="tab_repairs" hidden>
+                    <table class="repairs-table">
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Werkzeug</th>
+                                <th>Zu Ausfall</th>
+                                <th>Getauschte Bauteile</th>
+                                <th>Bemerkung</th>
+                            </tr>
+                        </thead>
 
-                    <tbody id="repairs_table_body">
-                        <tr>
-                            <td colspan="5">Lädt…</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                        <tbody id="repairs_table_body">
+                            <tr>
+                                <td colspan="5">Lädt…</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </section>
 
         </section>
 
@@ -259,5 +258,6 @@
     <script src="/assets/js/location-status.js"></script>
     <script src="/assets/js/charts.js"></script>
     <script src="script.js"></script>
+<script src="/assets/js/app-header.js"></script>
 </body>
 </html>

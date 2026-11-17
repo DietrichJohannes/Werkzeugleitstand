@@ -3,11 +3,11 @@
    Grundgerüst: /assets/css/page.css
    ========================================= */
 
-/* Folien füllen das Panel; Kopfzeile + Abstände ≈ 190px */
+/* Folien füllen das Panel; Menü + Titelzeile + Abstände ≈ 240px */
 .presentation-panel {
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 190px);
+    min-height: calc(100vh - 240px);
 }
 
 #presentation {

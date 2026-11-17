@@ -6,7 +6,7 @@
 
 // Benötigt: /assets/js/api.js, /assets/js/location-status.js, /assets/js/charts.js
 
-const REFRESH_SECONDS = 60;
+const REFRESH_SECONDS = 60;   // Seite aktualisiert sich selbst (Leitstand-Monitor)
 
 // Gewählter Zeitraum der Auswertung (wird im Browser gemerkt)
 const PERIOD_STORAGE_KEY = 'lokring.management.days';
@@ -17,10 +17,12 @@ let selectedDays = [30, 90, 365].includes(Number(localStorage.getItem(PERIOD_STO
 // ---------- Kennzahlen ----------
 
 function renderKpis(counts, locations) {
-    const total = counts.tool_quantity;
+    // Bestand = alle Werkzeuge außer verschrotteten (wie auf der Startseite);
+    // auch die Prozentwerte beziehen sich auf den Bestand.
+    const total = counts.tool_quantity - counts.tool_scrapped;
     const active = counts.tool_active;
     const maintenance = counts.tool_maintenance;
-    const ready = total - active - maintenance;
+    const ready = counts.tool_ready;
 
     const share = value => (total > 0 ? (value / total) * 100 : 0);
 
@@ -129,9 +131,7 @@ function buildLocationRow(location) {
     return row;
 }
 
-/*
- * Balken mit Markierungen bei den Grenzwerten (25 % / 50 %).
- */
+// Balken mit Strichen bei den Grenzwerten aus STATUS_THRESHOLDS
 function buildBar(percent) {
     const bar = document.createElement('div');
     bar.className = 'location-bar';
@@ -152,10 +152,11 @@ function buildBar(percent) {
 }
 
 
- // ---------- Reparaturen ----------
+// ---------- Reparaturen ----------
 
 function renderRepairs(repairs) {
     const tableBody = document.getElementById('repairs_table_body');
+    setText('repairs_count', repairs.length);
 
     if (repairs.length === 0) {
         setTableMessage(tableBody, 5, 'Keine Reparaturen vorhanden.');
@@ -177,6 +178,7 @@ function renderRepairs(repairs) {
 
 function renderFailures(failures) {
     const tableBody = document.getElementById('failures_table_body');
+    setText('failures_count', failures.length);
 
     if (failures.length === 0) {
         setTableMessage(tableBody, 6, 'Keine Ausfälle vorhanden.');
@@ -393,8 +395,49 @@ function initPeriodFilter() {
     mark();
 }
 
+// ---------- Ereignis-Reiter (Ausfälle / Reparaturen) ----------
+
+function initEventTabs() {
+    const tabs = [...document.querySelectorAll('.events-tabs [role="tab"]')];
+
+    const select = tab => {
+        tabs.forEach(other => {
+            const active = other === tab;
+            other.setAttribute('aria-selected', String(active));
+            other.tabIndex = active ? 0 : -1;
+            document.getElementById(other.getAttribute('aria-controls')).hidden = !active;
+        });
+    };
+
+    tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => select(tab));
+
+        // Pfeiltasten wechseln zwischen den Reitern
+        tab.addEventListener('keydown', event => {
+            if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+            const step = event.key === 'ArrowRight' ? 1 : -1;
+            const next = tabs[(index + step + tabs.length) % tabs.length];
+            select(next);
+            next.focus();
+        });
+    });
+}
+
+// Schatten unter der Zeitraum-Leiste, sobald sie oben "klebt"
+function initStickyHeader() {
+    const header = document.querySelector('.analytics-header');
+    const sentinel = document.createElement('div');
+    header.before(sentinel);
+
+    new IntersectionObserver(([entry]) => {
+        header.classList.toggle('is-stuck', !entry.isIntersecting && entry.boundingClientRect.top < 0);
+    }).observe(sentinel);
+}
+
 fillLegend();
 initPeriodFilter();
+initEventTabs();
+initStickyHeader();
 refresh();
 setInterval(refresh, REFRESH_SECONDS * 1000);
 

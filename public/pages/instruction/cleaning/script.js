@@ -16,6 +16,7 @@ function showCleaningMessage(text, isError) {
 async function loadCleaningTools() {
     try {
         const { tools } = await apiRequest('tools.php');
+        // Verschrottete Werkzeuge werden nicht mehr gereinigt
         const usableTools = tools.filter(tool => tool.status_id !== TOOL_STATUS_SCRAPPED);
 
         cleaningToolSelect.append(...usableTools.map(tool => new Option(tool.name, tool.id)));

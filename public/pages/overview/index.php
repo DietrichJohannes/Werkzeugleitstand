@@ -9,10 +9,10 @@
 </head>
 <body class="page">
 
+<?php include __DIR__ . '/../../components/app_header.php'; ?>
+
 <header class="page-header">
     <div class="page-header-left">
-        <a class="button_neutral page-back" href="/">Zurück</a>
-
         <div class="page-title">
             <h1>Übersicht</h1>
             <span>Alle Lokringwerkzeuge – suchen und steuern</span>
@@ -28,16 +28,21 @@
         <div class="panel-toolbar">
             <div>
                 <h2>Werkzeuge</h2>
-                <span>Mehrere Begriffe mit Leerzeichen trennen</span>
+                <span>Zeile anklicken, um ein Werkzeug zu steuern · mehrere Suchbegriffe mit Leerzeichen trennen</span>
             </div>
 
-            <input
-                type="search"
-                id="search"
-                class="panel-search"
-                placeholder="Name, Status, Standort, Lokring ..."
-                aria-label="Werkzeuge durchsuchen"
-            >
+            <div class="panel-filters">
+                <!-- Knöpfe + Anzahl je Status erzeugt script.js aus TOOL_STATUS -->
+                <div class="status-filter" id="status_filter" role="group" aria-label="Nach Status filtern"></div>
+
+                <input
+                    type="search"
+                    id="search"
+                    class="panel-search"
+                    placeholder="Name, Standort, Lokring ..."
+                    aria-label="Werkzeuge durchsuchen"
+                >
+            </div>
         </div>
 
         <div class="panel-table">
@@ -51,12 +56,11 @@
                         <th>Lokring</th>
                         <th>Backenset</th>
                         <th>Grundkörper</th>
-                        <th>Aktionen</th>
                     </tr>
                 </thead>
 
                 <tbody id="toolTableBody">
-                    <tr><td colspan="8" class="panel-empty">Lädt…</td></tr>
+                    <tr><td colspan="7" class="panel-empty">Lädt…</td></tr>
                 </tbody>
             </table>
         </div>
@@ -73,5 +77,6 @@
 <script src="/components/parts_dialog.js"></script>
 <script src="/components/tool_info_dialog.js"></script>
 <script src="script.js"></script>
+<script src="/assets/js/app-header.js"></script>
 </body>
 </html>
