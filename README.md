@@ -1,63 +1,136 @@
 # BSH Werkzeugleitstand – Lokring
 
-Web-Anwendung zum Verwalten und Verfolgen von Lokring-Werkzeugen: Standorte, Status
-(Bereit / Aktiv / Wartung / Verschrottet), Grundkörper, Backensets, Verbindungen,
-Ersatzteile, Reparaturen und Ausfälle.
+**Digitale Leitstand für Lokringwerkzeuge.** Die Intranet-Anwendung zeigt auf einen
+Blick, welches Werkzeug wo steht, ob sie einsatzbereit sind und wie oft diese ausfallen – von der
+Werkzeugausgabe an der Linie bis zur Auswertung für das Management.
 
-Technik: PHP 8.1+ (ohne Framework), MariaDB/MySQL, JavaScript und CSS ohne Build-Schritt.
+Statt Listen, Zettel und Excel-Tabellen gibt es eine zentrale Stelle für den gesamten
+Lebenszyklus eines Werkzeugs: **Bereit → Aktiv → Wartung → (Verschrottet)**, inklusive
+lückenlosem Verlauf jeder Statusänderung, jedes Ausfalls und jeder Reparatur.
 
-## Ordnerstruktur
+---
+
+## Funktionen
+
+### Leitstand (Startseite)
+- Kennzahlen aller Werkzeuge: Gesamt, Bereit, Aktiv, In Wartung
+- Kachel je Standort/Linie mit Bestand und **Mindestbestand** – Standorte, die darunter fallen,
+  werden als kritisch hervorgehoben
+
+### Werkzeugpool je Linie
+- Alle Werkzeuge eines Standorts mit Status
+- Werkzeug per Klick öffnen und direkt **Status oder Standort ändern**
+- **Ausfall melden** mit Ursache, betroffenem Bauteil und Bemerkung
+- **Reparatur erfassen** – optional einem offenen Ausfall zugeordnet, mit getauschten Bauteilen
+- **Reinigung quittieren**, letzte Reinigung wird angezeigt
+- Werkzeugdetails mit Grundkörper, Backenset, Verbindung, Lokring und komplettem **Verlauf**
+
+### Übersicht
+- Tabellarische Gesamtliste aller Werkzeuge über alle Standorte hinweg
+
+### Management-Ansicht
+- Status nach Standort
+- Auswertung über 30, 90 oder 365 Tage:
+  - Zeitverlauf von Ausfällen und Reparaturen
+  - Ausfälle nach Ursache
+  - häufig betroffene Bauteile
+  - Werkzeuge mit den meisten Ausfällen
+  - durchschnittliche Ausfallzeit je Standort
+- Ereignisliste
+
+### Dokumente & Anleitungen
+- **BoM-PDFs** (Stücklisten) je Grundkörper – hochladen im Editor, abrufbar für alle Berechtigten
+- Schritt-für-Schritt-Anleitungen als Präsentation: *Werkzeug reinigen*, *Werkzeug warten*
+
+### Verwaltung (Stammdaten)
+- Werkzeuge, Standorte, Grundkörper, Backensets, Verbindungen, Ersatzteile (HIBE- und
+  Herstellernummer) und Ausfallursachen pflegen
+- Werkzeuge werden nie gelöscht, sondern verschrottet – die Historie bleibt erhalten
+- Stammdaten lassen sich nur löschen, solange nichts mehr auf sie verweist
+
+## Rollen
+
+Die Anmeldung erfolgt per **Single Sign-On** über den Windows-Login (Kerberos). Die Rolle ergibt
+sich automatisch aus der Gruppenzugehörigkeit im Active Directory.
+
+| Rolle        | Darf |
+|--------------|------|
+| `beobachter` | alles ansehen (Leitstand, Übersicht, Management) |
+| `user`       | zusätzlich Status/Standort ändern, Ausfälle, Reparaturen und Reinigungen erfassen, Dokumente und Anleitungen öffnen |
+| `einrichter` | zusätzlich Stammdaten pflegen, Werkzeuge anlegen und verschrotten, Dokumente hochladen |
+
+
+## Technik
+
+| Bereich    | Umsetzung |
+|------------|-----------|
+| Backend    | PHP 8.1+, ohne Framework und ohne Composer |
+| Datenbank  | MariaDB / MySQL über PDO |
+| Frontend   | Vanilla JavaScript und CSS – kein Build-Schritt, kein npm |
+| Schnittstelle | REST-API in `public/api/`, ein Endpunkt pro Datei, JSON |
+| Anmeldung  | Apache + Kerberos (`mod_auth_gssapi`), Gruppen per LDAP |
+| Sicherheit | rechtebasierte Prüfung in jedem Endpunkt, CSRF-Schutz für schreibende Aufrufe, Dateien und PHP-Kern außerhalb des Web-Roots |
+
+
+### Ordnerstruktur
 
 ```
 config/               Konfiguration
   config.example.php  Vorlage (im Git)
   config.php          echte Werte mit Passwörtern (NICHT im Git)
-database/             Datenbank-Schema
+database/             Schema, Grunddaten, Demodaten, Migrationen
 storage/documents/    hochgeladene BoM-PDFs (NICHT im Git, der Webserver muss hier schreiben dürfen)
 src/                  PHP-Kern – vom Webserver NICHT erreichbar
   config.php          config('db.host') usw.
   database.php        db() – Datenbankverbindung
   auth.php            Rollen & Rechte (PERMISSIONS)
+  ad_login.php        Kerberos/LDAP-Anmeldung
   api_bootstrap.php   gemeinsame Basis aller API-Endpunkte
+  page_bootstrap.php  gemeinsame Basis geschützter Seiten
   tool_status.php     Werkzeug-Status (IDs + Texte)
+  tool_events.php     Werkzeugverlauf
 public/               ← einziger Ordner, den der Webserver ausliefert
   index.php           Startseite (Leitstand)
   api/                REST-API, ein Endpunkt pro Datei (tools.php, repairs.php, …)
   pages/              Unterseiten: overview, management, editor, line, instruction
-  components/         wiederverwendbare Dialoge (Werkzeug, Ersatzteile, Reparatur/Ausfall)
+  documents/          Dokumentenübersicht und PDF-Abruf
+  components/         wiederverwendbare Dialoge (Werkzeug, Ersatzteile, Reparatur/Ausfall, Upload)
   assets/css/         gemeinsame Styles
-  assets/js/          gemeinsame Skripte (api.js, tool-status.js, location-status.js)
+  assets/js/          gemeinsame Skripte (api.js, tool-status.js, location-status.js, charts.js)
 ```
 
-Jede Unterseite liegt in `public/pages/<name>/` mit `index.php`, `script.js` und
-optional `styles.css`.
+---
 
-## Lokal starten
+## Schnellstart (lokal)
 
 ```bash
 cp config/config.example.php config/config.php   # einmalig, dann Werte eintragen
-php -S localhost:8000 -t public
+php -d upload_max_filesize=20M -d post_max_size=21M -S localhost:8000 -t public
 ```
 
-Dann <http://localhost:8000> öffnen.
+Datenbank anlegen wie in [`database/README.md`](database/README.md) beschrieben
+(`schema.sql`, `seed.sql`, optional `demo_data.sql`), dann <http://localhost:8000> öffnen.
 
-Für die Entwicklung in `config/config.php` setzen:
+Ohne Active Directory in `config/config.php` setzen:
 
 ```php
 'environment' => 'development',
 'auth' => ['dev_fake_role' => 'einrichter'],   // jeder Aufruf gilt als angemeldet
 ```
 
-`dev_fake_role` wirkt **nur** bei `'environment' => 'development'`.
+`dev_fake_role` wirkt **nur** bei `'environment' => 'development'` und nur mit dem
+PHP-Testserver, nie unter Apache.
 
-## Auf einem Server installieren
+---
+
+## Installation auf einem Server
 
 1. Repository auf den Server kopieren, z. B. nach `/var/www/lokring`.
 2. `config/config.php` aus der Vorlage anlegen und ausfüllen:
    - `environment` auf `'production'` setzen
    - `auth.dev_fake_role` auf `null` setzen
    - `session.cookie_secure` auf `true` setzen, wenn die Seite über HTTPS läuft
-3. Datenbank anlegen (siehe `database/README.md`).
+3. Datenbank anlegen (siehe [`database/README.md`](database/README.md)).
 4. Den Webserver so einrichten, dass **nur `public/`** ausgeliefert wird.
    Die Anwendung muss im Wurzelverzeichnis der (Sub-)Domain laufen, z. B.
    `https://werkzeuge.intranet.firma.de/`, nicht in einem Unterordner.
@@ -76,19 +149,37 @@ Apache (VirtualHost):
 </VirtualHost>
 ```
 
+nginx:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name werkzeuge.intranet.firma.de;
+    root /var/www/lokring/public;
+    index index.php;
+    client_max_body_size 21m;
+
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+    }
+}
+```
+
 ### Anmeldung (Kerberos / AD)
 
 Die Anmeldung läuft per Single Sign-On: Apache prüft das Kerberos-Ticket des Windows-Logins,
 PHP liest danach Name, E-Mail und Gruppen per LDAP aus dem AD (`src/ad_login.php`).
 
-| AD-Gruppe (`config.php`)      | Rolle        | Darf                        |
-|-------------------------------|--------------|-----------------------------|
-| `auth.ldap.group_einrichter`  | `einrichter` | alles inkl. Stammdaten      |
-| `auth.ldap.group_user`        | `user`       | Status, Ausfälle, Reparaturen, Reinigungen |
-| keine der beiden              | `beobachter` | nur lesen                   |
+| AD-Gruppe (`config.php`)      | Rolle        |
+|-------------------------------|--------------|
+| `auth.ldap.group_einrichter`  | `einrichter` |
+| `auth.ldap.group_user`        | `user`       |
+| keine der beiden              | `beobachter` |
 
 Verschachtelte Gruppen zählen mit. Rollenänderungen im AD greifen nach spätestens
-`auth.role_refresh_minutes` (Standard 15). Ist das AD nicht erreichbar, gibt es nur Leserechte.
+`auth.role_refresh_minutes` (Standard 15).
 
 **1. Im AD (einmalig)**
 
@@ -139,24 +230,17 @@ und `auth.dev_fake_role` auf `null` setzen.
 **Test:** `https://werkzeuge.intranet.firma.de/api/me.php` zeigt die Rechte des angemeldeten
 Benutzers. Probleme stehen im Apache-Errorlog (Kerberos) bzw. PHP-Errorlog (`AD-Login: …`).
 
-nginx:
+### BoM-Dokumente
 
-```nginx
-server {
-    listen 443 ssl;
-    server_name werkzeuge.intranet.firma.de;
-    root /var/www/lokring/public;
-    index index.php;
+BoM-PDFs werden im Editor beim Grundkörper hochgeladen und liegen in `storage/documents/`, also
+außerhalb von `public/`. Abruf nur über `/documents/` (Übersicht) und `/documents/?file=<name>`.
 
-    location ~ \.php$ {
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
-    }
-}
-```
+- `storage/documents/` muss für den Webserver-Benutzer beschreibbar sein und ins Backup.
+- Die App erlaubt bis zu 20 MB pro Datei. PHP muss das ebenfalls zulassen, Standard sind nur 2 MB:
+  in der `php.ini` `upload_max_filesize = 20M` und `post_max_size = 21M` setzen.
+  Bei nginx zusätzlich `client_max_body_size 21m;`.
 
-## Checkliste vor dem Produktivbetrieb
+### Checkliste vor dem Produktivbetrieb
 
 - [ ] **Kerberos/AD-Login einrichten** (siehe „Anmeldung (Kerberos / AD)“): Gruppen,
       Servicebenutzer, Keytab, `auth.ldap` in `config/config.php`.
@@ -167,20 +251,13 @@ server {
       (SELECT/INSERT/UPDATE/DELETE nur auf die Datenbank `lokring`).
 - [ ] HTTPS aktivieren und `session.cookie_secure` auf `true` setzen.
 - [ ] `environment` = `'production'`, `dev_fake_role` = `null`.
-- [ ] Regelmäßige Datenbank-Backups einrichten.
+- [ ] Regelmäßige Datenbank-Backups einrichten (Datenbank **und** `storage/documents/`).
 
-## BoM-Dokumente
+---
 
-BoM-PDFs werden im Editor beim Grundkörper hochgeladen und liegen in `storage/documents/`, also
-außerhalb von `public/`. Abruf nur über `/documents/` (Übersicht) und `/documents/?file=<name>`.
+## Für Entwickler
 
-- `storage/documents/` muss für den Webserver-Benutzer beschreibbar sein und ins Backup.
-- Die App erlaubt bis zu 20 MB pro Datei. PHP muss das ebenfalls zulassen, Standard sind nur 2 MB:
-  in der `php.ini` `upload_max_filesize = 20M` und `post_max_size = 21M` setzen, lokal
-  `php -d upload_max_filesize=20M -d post_max_size=21M -S localhost:8000 -t public`.
-  Bei nginx zusätzlich `client_max_body_size 21m;`.
-
-## API
+### API
 
 Jede Datei in `public/api/` ist ein Endpunkt. Die erlaubten Aufrufe stehen im Kopfkommentar
 der Datei. Es gelten folgende Regeln:
@@ -189,10 +266,20 @@ der Datei. Es gelten folgende Regeln:
 - `GET` liest, `POST` legt an, `PATCH` ändert nur die mitgeschickten Felder, `DELETE` löscht.
 - Antwort immer `{ "success": true|false, "message": "...", ... }`.
 - Rechte stehen in `src/auth.php` (`PERMISSIONS`). Endpunkte prüfen Rechte, nie Rollen.
+- Schreibende Aufrufe brauchen den Header `X-Requested-With: fetch` und dürfen nicht von
+  fremden Origins kommen (CSRF-Schutz).
 
-Im Frontend werden alle Aufrufe über `apiRequest()` aus `public/assets/js/api.js` gemacht.
+Im Frontend werden alle Aufrufe über `apiRequest()` aus `public/assets/js/api.js` gemacht,
+das den Header automatisch setzt.
 
-## Werkzeug-Status
+### Werkzeug-Status
 
-Die IDs und Texte stehen an zwei Stellen und müssen zusammen geändert werden:
-`src/tool_status.php` (PHP) und `public/assets/js/tool-status.js` (JavaScript).
+Die IDs (1 Bereit, 2 Aktiv, 3 Wartung, 4 Verschrottet) und Texte stehen an zwei Stellen und
+müssen zusammen geändert werden: `src/tool_status.php` (PHP) und
+`public/assets/js/tool-status.js` (JavaScript).
+
+### Datenbank-Änderungen
+
+Die Produktion ist live: Jede Schemaänderung kommt als nummerierte Migration nach
+`database/migrations/` und wird gleichzeitig in `database/schema.sql` nachgezogen.
+Tabellenübersicht und Benennungsregeln: [`database/README.md`](database/README.md).

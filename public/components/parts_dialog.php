@@ -22,7 +22,7 @@
                 <tr>
                     <th>Bauteil</th>
                     <th>HiBe-Nr.</th>
-                    <th>Hersteller-Nr.</th>
+                    <th>Vulkan-Nr.</th>
                     <th></th>
                 </tr>
             </thead>
