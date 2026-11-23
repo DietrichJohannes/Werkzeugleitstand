@@ -1,3 +1,7 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/../../../src/asset.php';
+?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -6,10 +10,10 @@
 
     <title>Management-Ansicht – Lokringwerkzeuge</title>
 
-    <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/page.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/charts.css">
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="<?= asset('/assets/css/styles.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= asset('/assets/css/page.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= asset('/assets/css/charts.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= asset('/pages/management/styles.css') ?>">
 </head>
 
 <body class="page mgmt">
@@ -254,10 +258,10 @@
 
     </main>
 
-    <script src="/assets/js/api.js"></script>
-    <script src="/assets/js/location-status.js"></script>
-    <script src="/assets/js/charts.js"></script>
-    <script src="script.js"></script>
-<script src="/assets/js/app-header.js"></script>
+    <script src="<?= asset('/assets/js/api.js') ?>"></script>
+    <script src="<?= asset('/assets/js/location-status.js') ?>"></script>
+    <script src="<?= asset('/assets/js/charts.js') ?>"></script>
+    <script src="<?= asset('/pages/management/script.js') ?>"></script>
+<script src="<?= asset('/assets/js/app-header.js') ?>"></script>
 </body>
 </html>

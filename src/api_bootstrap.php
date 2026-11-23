@@ -10,9 +10,9 @@ declare(strict_types=1);
  */
 
 const API_NAME              = 'BSH Werkzeugleitstand';
-const API_VERSION           = '1.0.0';
+const API_VERSION           = '2.2.2';
 const API_AUTHOR            = 'Johannes Dietrich';
-const API_LAST_MODIFIED     = '06.11.2026';
+const API_LAST_MODIFIED     = '23.11.2026';
 const API_DESCRIPTION       = 'REST-API zur Verwaltung von Werkzeugen, Reparaturen und Ersatzteilen.';
 
 // Alle Zeitstempel (date(), NOW()-Vergleiche) in deutscher Zeit.

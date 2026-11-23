@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+require_once __DIR__ . '/../../../../src/asset.php';
 $slideFiles = glob(__DIR__ . '/slides/*.html');
 sort($slideFiles);
 ?>
@@ -8,9 +10,9 @@ sort($slideFiles);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Werkzeug warten – Anleitung</title>
-    <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/page.css">
-    <link rel="stylesheet" type="text/css" href="../styles.css">
+    <link rel="stylesheet" type="text/css" href="<?= asset('/assets/css/styles.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= asset('/assets/css/page.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= asset('/pages/instruction/styles.css') ?>">
 </head>
 <body class="page">
 
@@ -57,8 +59,8 @@ sort($slideFiles);
 <script>
     window.totalSlides = <?= count($slideFiles) ?>;
 </script>
-<script src="../presentation.js"></script>
+<script src="<?= asset('/pages/instruction/presentation.js') ?>"></script>
 
-<script src="/assets/js/app-header.js"></script>
+<script src="<?= asset('/assets/js/app-header.js') ?>"></script>
 </body>
 </html>

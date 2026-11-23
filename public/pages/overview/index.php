@@ -1,11 +1,15 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/../../../src/asset.php';
+?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Übersicht – Lokringwerkzeuge</title>
-    <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/page.css">
+    <link rel="stylesheet" type="text/css" href="<?= asset('/assets/css/styles.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= asset('/assets/css/page.css') ?>">
 </head>
 <body class="page">
 
@@ -71,12 +75,12 @@
 <?php include __DIR__ . '/../../components/tool_info_dialog.php'; ?>
 <?php include __DIR__ . '/../../components/report_dialog.php'; ?>
 <?php include __DIR__ . '/../../components/parts_dialog.php'; ?>
-<script src="/assets/js/api.js"></script>
-<script src="/assets/js/tool-status.js"></script>
-<script src="/components/report_dialog.js"></script>
-<script src="/components/parts_dialog.js"></script>
-<script src="/components/tool_info_dialog.js"></script>
-<script src="script.js"></script>
-<script src="/assets/js/app-header.js"></script>
+<script src="<?= asset('/assets/js/api.js') ?>"></script>
+<script src="<?= asset('/assets/js/tool-status.js') ?>"></script>
+<script src="<?= asset('/components/report_dialog.js') ?>"></script>
+<script src="<?= asset('/components/parts_dialog.js') ?>"></script>
+<script src="<?= asset('/components/tool_info_dialog.js') ?>"></script>
+<script src="<?= asset('/pages/overview/script.js') ?>"></script>
+<script src="<?= asset('/assets/js/app-header.js') ?>"></script>
 </body>
 </html>

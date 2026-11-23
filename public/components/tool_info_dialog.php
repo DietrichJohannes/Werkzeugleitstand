@@ -1,4 +1,6 @@
-<?php require_once __DIR__ . '/../../src/tool_status.php'; // Status-Auswahl unten ?>
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/../../src/tool_status.php'; // Status-Auswahl unten ?>
 <!-- =========================================
      Dialog: Werkzeug anzeigen und steuern (Status, Standort,
      Verlauf, Ersatzteile, Reparatur)

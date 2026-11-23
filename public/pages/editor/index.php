@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/../../../src/asset.php';
 
 // Nur für Benutzer mit Recht 'admin.access' (siehe src/auth.php).
 require_once __DIR__ . '/../../../src/page_bootstrap.php';
@@ -13,9 +14,9 @@ requirePagePermission('admin.access');
 
     <title>Werkzeugleitstand – Administration</title>
 
-    <link rel="stylesheet" type="text/css" href="/assets/css/styles.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/page.css">
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="<?= asset('/assets/css/styles.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= asset('/assets/css/page.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= asset('/pages/editor/styles.css') ?>">
 </head>
 
 <body class="page">
@@ -260,11 +261,11 @@ requirePagePermission('admin.access');
 <?php include __DIR__ . '/../../components/report_dialog.php'; ?>
 <?php include __DIR__ . '/../../components/document_upload_dialog.php'; ?>
 
-<script src="/assets/js/api.js"></script>
-<script src="/assets/js/tool-status.js"></script>
-<script src="/components/report_dialog.js"></script>
-<script src="/components/document_upload_dialog.js"></script>
-<script src="script.js"></script>
-<script src="/assets/js/app-header.js"></script>
+<script src="<?= asset('/assets/js/api.js') ?>"></script>
+<script src="<?= asset('/assets/js/tool-status.js') ?>"></script>
+<script src="<?= asset('/components/report_dialog.js') ?>"></script>
+<script src="<?= asset('/components/document_upload_dialog.js') ?>"></script>
+<script src="<?= asset('/pages/editor/script.js') ?>"></script>
+<script src="<?= asset('/assets/js/app-header.js') ?>"></script>
 </body>
 </html>

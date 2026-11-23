@@ -6,7 +6,7 @@ declare(strict_types=1);
    direkt nach <body> einbinden:
 
      <?php include __DIR__ . '/../../components/app_header.php'; ?>
-     <script src="/assets/js/app-header.js"></script>   (am Seitenende)
+     <script src="<?= asset('/assets/js/app-header.js') ?>"></script>   (am Seitenende)
 
    Aktiver Menüpunkt, angemeldeter Benutzer und Rechte
    (data-permission) setzt /assets/js/app-header.js.
